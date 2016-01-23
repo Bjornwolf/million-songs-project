@@ -2,6 +2,8 @@ import yaml
 import sys
 from load_data import load_data
 from graph import dist, check_graph
+import numpy as np
+import matplotlib.pyplot as plt
 
 config_dict = yaml.load(open(sys.argv[1], 'r'))
 print config_dict
@@ -13,4 +15,8 @@ vertices = {}
 for d in train_data:
     vertices[d['track_id']] = d
 print len(vertices)
-# check_graph(vertices)
+res = check_graph(vertices)
+print len(res)
+
+plt.hist(res)
+plt.show()

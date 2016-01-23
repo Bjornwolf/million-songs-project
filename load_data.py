@@ -4,7 +4,7 @@ import sys
 
 # Usage: python load_data.py "./lastfm_train/**/**/**/*.json" "./lastfm_test/**/**/**/*.json"
 
-def load_data(train_set_dir, test_set_dir, similarity_threshold = 0.02, verbose=True):
+def load_data(train_set_dir, test_set_dir, similarity_threshold = 0.08, verbose=True):
     train_files = glob.glob(train_set_dir)
     test_files = glob.glob(test_set_dir)
 

@@ -17,12 +17,14 @@ def check_part(v, vertices):
     return members
 
 def check_graph(vertices):
+    results = []
     unvisited_ids = set(vertices.keys())
     for v in vertices:
         if v in unvisited_ids:
             members = check_part(v, vertices)
-            print len(members)
+            results.append(len(members))
             unvisited_ids -= members
+    return results
 
 '''
 class V:
