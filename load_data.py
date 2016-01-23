@@ -27,10 +27,11 @@ def load_data(train_set_dir, test_set_dir, verbose=True):
             if None not in test_tags:
                 train_tags[None] = (0, [])
             train_tags[None][1].append(track)
-        for tag in track["tags"]:
-            if tag[0] not in train_tags:
-                train_tags[tag[0]] = (tag[1], [])
-            train_tags[tag[0]][1].append(track)
+        else:
+            for tag in track["tags"]:
+                if tag[0] not in train_tags:
+                    train_tags[tag[0]] = (tag[1], [])
+                train_tags[tag[0]][1].append(track)
         handler.close()
 
     if verbose:
@@ -45,11 +46,11 @@ def load_data(train_set_dir, test_set_dir, verbose=True):
             if None not in test_tags:
                 test_tags[None] = (0, [])
             test_tags[None][1].append(track)
-
-        for tag in track["tags"]:
-            if tag[0] not in test_tags:
-                test_tags[tag[0]] = (tag[1], [])
-            test_tags[tag[0]][1].append(track)
+        else:
+            for tag in track["tags"]:
+                if tag[0] not in test_tags:
+                    test_tags[tag[0]] = (tag[1], [])
+                test_tags[tag[0]][1].append(track)
         handler.close()
 
     if verbose:
