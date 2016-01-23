@@ -6,6 +6,7 @@ class DataClusters(object):
         self.clusters = {}
 
     def process_dataset(self, vertices):
+        vertices_no = len(vertices)
         unvisited_ids = set(vertices.keys())
         while len(unvisited_ids) != 0:
             candidate_id = unvisited_ids.pop()
@@ -13,9 +14,10 @@ class DataClusters(object):
             cluster_elements = {}
             for element_id in cluster_element_ids:
                 cluster_elements[element_id] = vertices.get(element_id, "nodata")
-            unvisited_ids -= cluster_element_ids
+            unvisited_ids -= cluster_element_ids            
             self.next_cluster_number += 1
             self.clusters[self.next_cluster_number] = Cluster(cluster_element_ids, cluster_elements)
+            print len(unvisited_ids), '/', vertices_no
 
     def count(self):
         return len(self.clusters)
