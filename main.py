@@ -20,7 +20,7 @@ clusters.process_dataset(vertices)
 
 print clusters.count()
 hist = clusters.hist()
-hist_items = hist.items()
+hist_items = map(lambda x: x[1], hist.items())
 
 plt.hist(hist_items)
 plt.show()
