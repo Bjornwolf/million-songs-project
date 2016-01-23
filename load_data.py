@@ -1,5 +1,6 @@
 import glob
 import json
+import sys
 
 # Usage: python load_data.py "./lastfm_train/**/**/**/*.json" "./lastfm_test/**/**/**/*.json"
 
@@ -58,4 +59,5 @@ if __name__ == "__main__":
     train_glob = sys.argv[1]
     test_glob = sys.argv[2]
 
-    print load_data(train_glob, test_glob)
+    data = load_data(train_glob, test_glob)
+    print data[0][0]

@@ -4,13 +4,16 @@ def dist(x, y):
 
 def check_part(v, vertices):
     members = set([v])
-    to_visit = map(lambda x: x[0], vertices[v].similars)
+    to_visit = map(lambda x: x[0], vertices[v][u'similars'])
     while to_visit != []:
         v = to_visit[0]
         to_visit = to_visit[1:]
         if v not in members:
             members |= set([v])
-            to_visit += list(set(map(lambda x: x[0], vertices[v].similars)) - members)
+            try:
+                to_visit += list(set(map(lambda x: x[0], vertices[v][u'similars'])) - members)
+            except KeyError:
+                pass
     return members
 
 def check_graph(vertices):
@@ -21,6 +24,7 @@ def check_graph(vertices):
             print len(members)
             unvisited_ids -= members
 
+'''
 class V:
     def __init__(self, ident, neighbours):
         self.similars = map(lambda x: (x, 1.), neighbours)
@@ -38,3 +42,4 @@ if __name__ == '__main__':
     vertices["8"] = V("8", ["4", "2"])
 
     check_graph(vertices)
+'''
