@@ -1,7 +1,7 @@
 import yaml
 import sys
 from load_data import load_data
-from graph import dist, check_graph
+from data_clusters import DataClusters
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -14,9 +14,13 @@ train_data, train_tags, test_data, test_tags = load_data(train_path, test_path)
 vertices = {}
 for d in train_data:
     vertices[d['track_id']] = d
-print len(vertices)
-res = check_graph(vertices)
-print len(res)
 
-plt.hist(res)
+clusters = DataClusters()
+clusters.process_dataset(vertices)
+
+print clusters.count()
+hist = clusters.hist()
+hist_items = hist.items()
+
+plt.hist(hist_items)
 plt.show()

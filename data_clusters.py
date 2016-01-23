@@ -9,18 +9,18 @@ class DataClusters(object):
         unvisited_ids = set(vertices.keys())
         while len(unvisited_ids) != 0:
             candidate_id = unvisited_ids.pop()
-            cluster_element_ids = check_part(candidate, vertices)
+            cluster_element_ids = check_part(candidate_id, vertices)
             cluster_elements = {}
             for element_id in cluster_element_ids:
-                cluster_elements[element_id] = vertices[element_id]
+                cluster_elements[element_id] = vertices.get(element_id, "nodata")
             unvisited_ids -= cluster_element_ids
             self.next_cluster_number += 1
             self.clusters[self.next_cluster_number] = Cluster(cluster_element_ids, cluster_elements)
 
-    def cluster_count(self):
+    def count(self):
         return len(self.clusters)
 
-    def cluster_hist(self):
+    def hist(self):
         hist = {}
         for number in self.clusters:
             hist[number] = self.clusters[number].size()
