@@ -1,11 +1,7 @@
-import sys
 import glob
 import json
 
 # Usage: python load_data.py "./lastfm_train/**/**/**/*.json" "./lastfm_test/**/**/**/*.json"
-
-train_set_directory = sys.argv[1]
-test_set_directory = sys.argv[2]
 
 def load_data(train_set_dir, test_set_dir, verbose=True):
     train_files = glob.glob(train_set_dir)
@@ -57,3 +53,9 @@ def load_data(train_set_dir, test_set_dir, verbose=True):
         print 'Processed test dataset (', len(test_data), ' entries)'
 
     return (train_data, train_tags, test_data, test_tags)
+
+if __name__ == "__main__":
+    train_glob = sys.argv[1]
+    test_glob = sys.argv[2]
+
+    print load_data(train_glob, test_glob)
