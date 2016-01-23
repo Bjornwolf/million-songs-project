@@ -23,6 +23,10 @@ def load_data(train_set_dir, test_set_dir, verbose=True):
         handler = open(track_file, 'r')
         track = json.load(handler)
         train_data.append(track)
+        if len(track["tags"]) == 0:
+            if None not in test_tags:
+                train_tags[None] = (0, [])
+            train_tags[None][1].append(track)
         for tag in track["tags"]:
             if tag[0] not in train_tags:
                 train_tags[tag[0]] = (tag[1], [])
@@ -37,6 +41,11 @@ def load_data(train_set_dir, test_set_dir, verbose=True):
         handler = open(track_file, 'r')
         track = json.load(handler)
         test_data.append(track)
+        if len(track["tags"]) == 0:
+            if None not in test_tags:
+                test_tags[None] = (0, [])
+            test_tags[None][1].append(track)
+
         for tag in track["tags"]:
             if tag[0] not in test_tags:
                 test_tags[tag[0]] = (tag[1], [])
@@ -47,5 +56,3 @@ def load_data(train_set_dir, test_set_dir, verbose=True):
         print 'Processed test dataset (', len(test_data), ' entries)'
 
     return (train_data, train_tags, test_data, test_tags)
-
-print load_data(train_set_directory, test_set_directory)
