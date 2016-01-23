@@ -2,6 +2,8 @@ import sys
 import glob
 import json
 
+# Usage: python load_data.py "./lastfm_train/**/**/**/*.json" "./lastfm_test/**/**/**/*.json"
+
 train_set_directory = sys.argv[1]
 test_set_directory = sys.argv[2]
 
