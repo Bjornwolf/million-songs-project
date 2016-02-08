@@ -124,8 +124,6 @@ class Graph(object):
                 sv2_id = self.sv_map[v2]
                 merged_edges = self.merge_edges(sv1_id, sv2_id)
                 new_loss, old_loss, (a, b, c, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
-                print self.loss()
-                print new_loss, a, b, c, d
                 if new_loss < old_loss:
                     self.within_cluster_distance = a
                     self.singular_vertices_no = b / self.max_edge
