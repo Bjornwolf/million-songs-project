@@ -2,9 +2,7 @@ import glob
 import json
 import sys
 
-# Usage: python load_data.py "./lastfm_train/**/**/**/*.json" "./lastfm_test/**/**/**/*.json"
-
-def load_data(train_set_dir, test_set_dir, similarity_threshold = 0.08, verbose=True):
+def load_data(train_set_dir, test_set_dir, similarity_threshold):
     train_files = glob.glob(train_set_dir)
     test_files = glob.glob(test_set_dir)
 
@@ -12,9 +10,6 @@ def load_data(train_set_dir, test_set_dir, similarity_threshold = 0.08, verbose=
     train_tags = {}
     test_data = []
     test_tags = {}
-
-    if verbose:
-        print 'Processing train dataset'
 
     for track_file in train_files:
         handler = open(track_file, 'r')
@@ -32,10 +27,6 @@ def load_data(train_set_dir, test_set_dir, similarity_threshold = 0.08, verbose=
                 train_tags[tag[0]][1].append(track)
         handler.close()
 
-    if verbose:
-        print 'Processed train dataset (', len(train_data), ' entries)'
-        print 'Processing test dataset'
-
     for track_file in test_files:
         handler = open(track_file, 'r')
         track = json.load(handler)
@@ -50,9 +41,6 @@ def load_data(train_set_dir, test_set_dir, similarity_threshold = 0.08, verbose=
                     test_tags[tag[0]] = (tag[1], [])
                 test_tags[tag[0]][1].append(track)
         handler.close()
-
-    if verbose:
-        print 'Processed test dataset (', len(test_data), ' entries)'
 
     return (train_data, train_tags, test_data, test_tags)
 
