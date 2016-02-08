@@ -29,8 +29,8 @@ class Graph(object):
         self.singular_vertices_no = len(vertices_map)
         self.within_cluster_distance = 0.
         self.cluster_edginess = sum(map(len, self.edges.values()))
-        self.between_cluster_distance = sum(map(lambda x: x[2], 
-                                            self.sorted_edges))
+        self.between_cluster_distance = 2. * sum(map(lambda x: x[2], 
+                                                 self.sorted_edges))
 
     def __sorted_edges(self, vertices_map):
         s = set()
@@ -68,15 +68,19 @@ class Graph(object):
         a_diff -= sv2_size * sv2_max_edge
         size_one_svs = 0
         if self.vertices[sv1_id].count() == 1:
-            size_one_svs += 1
+            size_one_svs -= 1
         if self.vertices[sv2_id].count() == 1:
-            size_one_svs += 1
+            size_one_svs -= 1
         b_diff = self.max_edge * size_one_svs
 
         merged_edges = self.merge_edges(sv1_id, sv2_id)
         c_diff = total_size * len(merged_edges) 
         c_diff -= sv1_size * len(self.edges[sv1_id])
         c_diff -= sv2_size * len(self.edges[sv2_id])
+        doubled = list(set(self.edges[sv1_id].keys()) & set(self.edges[sv2_id].keys()))
+        for v in doubled:
+            c_diff -= len(self.edges[v]) - 1
+
 
         d_diff = 0.
         for v in merged_edges:
@@ -120,6 +124,8 @@ class Graph(object):
                 sv2_id = self.sv_map[v2]
                 merged_edges = self.merge_edges(sv1_id, sv2_id)
                 new_loss, old_loss, (a, b, c, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
+                print self.loss()
+                print new_loss, a, b, c, d
                 if new_loss < old_loss:
                     self.within_cluster_distance = a
                     self.singular_vertices_no = b / self.max_edge
