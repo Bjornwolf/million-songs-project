@@ -8,5 +8,8 @@ class SuperVertex(object):
     def add(self, vertex):
         self.__map[vertex['track_id']] = vertex
 
+    def count(self):
+        return len(self.__map.keys())
+
     def build(self):
         return Graph(self.__map)
