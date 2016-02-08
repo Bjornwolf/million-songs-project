@@ -26,6 +26,9 @@ class SuperVertex(object):
     def append(self, new_member):
         # TODO: Implement this method.
         pass
+
+    def member_count(self):
+        return len(self.members)
     
     def __getitem__(self, key, val):
         if key in ['tags', 'similars']:
