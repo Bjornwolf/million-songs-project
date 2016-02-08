@@ -53,7 +53,7 @@ class Graph(object):
         d = self.between_cluster_distance
         return (a + b) * c / d
 
-    def loss_change(self, sv1_id, sv2_id, merged_edges=None):
+    def loss_change(self, sv1_id, sv2_id, merged_edges):
         sv1_max_edge = max(self.edges[sv1_id].values())
         sv2_max_edge = max(self.edges[sv2_id].values())
         new_max_edge = max(sv1_max_edge, sv2_max_edge)
@@ -71,8 +71,7 @@ class Graph(object):
             size_one_svs += 1
         b_diff = self.max_edge * size_one_svs
 
-        if not merged_edges: 
-            merged_edges = self.merge_edges(sv1_id, sv2_id)
+        merged_edges = self.merge_edges(sv1_id, sv2_id)
         c_diff = total_size * len(merged_edges) 
         c_diff -= sv1_size * len(self.edges[sv1_id])
         c_diff -= sv2_size * len(self.edges[sv2_id])
@@ -110,5 +109,36 @@ class Graph(object):
         return edges
 
     def reduce(self):
-        pass
+        improvable = True
+        while improvable:
+            improvable = False
+            for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
+                sv1_id = self.sv_map[v1]
+                sv2_id = self.sv_map[v2]
+                merged_edges = self.merge_edges(sv1_id, sv2_id)
+                if self.loss_change(sv1_id, sv2_id, merged_edges) < 0.:
+                    # sklej superwierzcholki
+                    new_sv = SuperVertex()
+                    for k in self.vertices[sv1_id].map:
+                        new_sv.add(self.vertices[sv1_id][k])
+                    for k in self.vertices[sv2_id].map:
+                        new_sv.add(self.vertices[sv2_id][k])
+                    new_id = new_sv.identity
+                    self.vertices[new_id] = new_sv
+                    self.edges[new_id] = merged_edges
+                    for v in merged_edges:
+                        self.edges[v][new_id] = merged_edges[v]
+
+                    for v in self.edges[sv1_id]:
+                        del(self.edges[v][sv1_id])
+                    for v in self.edges[sv2_id]:
+                        del(self.edges[v][sv2_id])
+                    del(self.edges[sv1_id])
+                    del(self.edges[sv2_id])
+
+                    del(self.vertices[sv1_id])
+                    del(self.vertices[sv2_id])
+                    
+                    improvable = True
+                    break
 

@@ -1,15 +1,18 @@
 from graph import Graph
 
 class SuperVertex(object):
+    ID = 0
     def __init__(self):
         self.__graph = None
-        self.__map = dict()
+        self.map = dict()
+        self.identity = ID
+        ID += 1
 
     def add(self, vertex):
-        self.__map[vertex['track_id']] = vertex
+        self.map[vertex['track_id']] = vertex
 
     def count(self):
-        return len(self.__map.keys())
+        return len(self.map.keys())
 
     def build(self):
-        return Graph(self.__map)
+        return Graph(self.map)
