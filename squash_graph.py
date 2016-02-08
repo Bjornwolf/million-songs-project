@@ -1,3 +1,5 @@
+from super_vertex import SuperVertex
+
 class GraphSquasher(object):
     def __init__(self, radius):
         self.membership_lookup = dict() 
@@ -80,31 +82,3 @@ class GraphSquasher(object):
 
         return None
 
-class SuperVertex(object):
-    NEXT_SV_ID = 1
-
-    def __init__(self, track_id, edges, tags):
-        self.identity = SuperVertex.NEXT_SV_ID
-        self.members = []
-        self.edges = edges 
-        self.tags = tags
-        SuperVertex.NEXT_SV_ID += 1
-
-    def loss(self):
-        max_dist = sorted(self.edges, lambda x: x[2])[-1] 
-
-    def loss_changed(self, v):
-
-    def similars_from_edges(self):
-        edges_list = sorted(self.edges, lambda x: x[2])
-        return [[tid, similarity] for _, tid, similarity in edges_list]
-
-    def append(self, new_member):
-    
-    def __getitem__(self, key, val):
-        if key in ['tags', 'similars', 'supervertex?']:
-            return { 'tags': self.tags.items(),
-                     'similars': self.similars_from_edges(),
-                     'supervertex?': True }[key]
-        else
-            raise KeyError
