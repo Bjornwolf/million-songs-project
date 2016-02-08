@@ -7,4 +7,4 @@ from graph import Graph
 # similarity_threshold = config_dict['similarity_threshold']
 
 g = Graph(EXAMPLE_GRAPH)
-g.reduce()
+g.reduce(min_elems=2)

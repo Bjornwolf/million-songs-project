@@ -1,4 +1,4 @@
-from super_vertex import SuperVertex
+# from super_vertex import SuperVertex
 
 class SmartEdge(object):
     def __init__(self):
@@ -159,9 +159,9 @@ class Graph(object):
 
         return edges
 
-    def reduce(self):
+    def reduce(self, min_elems=50):
         improvable = True
-        while improvable:
+        while improvable and len(self.vertices) >= min_elems:
             improvable = False
             if len(self.vertices) > 1:
                 for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
@@ -210,4 +210,30 @@ class Graph(object):
                         
                         improvable = True
                         break
+        for v in self.vertices:
+            self.vertices[v] = self.vertices[v].build()
+            self.vertices[v].reduce(min_elems=min_elems)
 
+
+# from graph import Graph
+
+class SuperVertex(object):
+    ID = 0
+    def __init__(self):
+        self.__graph = None
+        self.map = dict()
+        self.identity = SuperVertex.ID
+        self.max_edge = 0.
+        SuperVertex.ID += 1
+
+    def add(self, vertex):
+        self.map[vertex['track_id']] = vertex
+        for v, w in vertex['similars']:
+            if v in self.map:
+                self.max_edge = max(self.max_edge, w)
+
+    def count(self):
+        return len(self.map.keys())
+
+    def build(self):
+        return Graph(self.map)
