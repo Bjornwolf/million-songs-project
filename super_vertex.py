@@ -1,18 +1,12 @@
 from graph import Graph
 
 class SuperVertex(object):
-    NEXT_SV_ID = 0
+    def __init__(self):
+        self.__graph = None
+        self.__map = dict()
 
-    def __init__(self, vertex):
-       first_vertex_map = dict()
-       self.__internal = Graph()
+    def add(self, vertex):
+        self.__map[vertex['track_id']] = vertex
 
-    def internal_vertices_count(self):
-
-    def __getitem__(self, key, val):
-        if key in ['tags', 'similars']:
-            return { 'tags': self.tags,
-                     'similars': self.similars_from_edges() 
-                   }[key]
-        else
-            raise KeyError
+    def build(self):
+        return Graph(self.__map)
