@@ -10,7 +10,7 @@ class Graph(object):
             self.sv_map[v] = sv.identity
             self.vertices[sv.identity] = sv
 
-        self.sorted_edges = get_sorted_edges(vertices_map) #TODO
+        self.sorted_edges = self.__sorted_edges(vertices_map) 
 
         for (v1, v2, weight) in self.sorted_edges:
             try:
@@ -30,6 +30,18 @@ class Graph(object):
         self.cluster_edginess = sum(self.edges.values())
         self.between_cluster_distance = sum(map(lambda x: x[2], 
                                             self.sorted_edges))
+
+    def __sorted_edges(self, vertices_map):
+        s = set()
+
+        for key in vertices_map:
+            for similar in vertices_map[key]['similars']:
+                track = vertices_map[key]
+                s.add((min(track['trackid'], similar[0]), 
+                       max(track['trackid'], similar[0]),
+                       1 / similar[1]))
+
+        return sorted(s, lambda x: x[2])
 
     def has_vertex(vertex_id):
         return vertex_id in self.sv_map
