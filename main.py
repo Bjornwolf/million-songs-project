@@ -8,3 +8,4 @@ from graph import Graph
 
 g = Graph(EXAMPLE_GRAPH)
 g.reduce(min_elems=2)
+print g.vertices

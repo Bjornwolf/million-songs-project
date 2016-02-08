@@ -48,6 +48,50 @@ class EdgeMap(object):
     def debug(self):
         print self.edges
 
+class FlatGraph(object):
+    def __init__(self, vertices_map):
+        self.vertices = {}
+        self.sv_map = {}
+        self.edges = EdgeMap()
+
+        for v in vertices_map:
+            sv = SuperVertex()
+            sv.add(vertices_map[v])
+            self.sv_map[v] = sv.identity
+            self.vertices[sv.identity] = sv
+
+        self.sorted_edges = self.__sorted_edges(vertices_map)
+
+        for (v1, v2, weight) in self.sorted_edges:
+            if v1 in vertices_map and v2 in vertices_map:
+                self.edges.connect(self.sv_map[v1], self.sv_map[v2], weight)
+                self.edges.connect(self.sv_map[v2], self.sv_map[v1], weight)
+
+        self.max_edge = self.sorted_edges[-1][2]
+        self.singular_vertices_no = len(vertices_map)
+        self.within_cluster_distance = 0.
+        self.cluster_edginess = sum(map(len, self.edges.values()))
+        self.between_cluster_distance = 2. * sum(map(lambda x: x[2], 
+                                                 self.sorted_edges))
+
+    def __sorted_edges(self, vertices_map):
+        s = set()
+
+        for key in vertices_map:
+            for similar in vertices_map[key]['similars']:
+                track = vertices_map[key]
+                s.add((min(track['track_id'], similar[0]),
+                       max(track['track_id'], similar[0]),
+                       1 / similar[1]))
+
+        return sorted(s, key=lambda x: x[2])
+
+    def has_vertex(self, vertex_id):
+        return vertex_id in self.sv_map
+
+    def reduce(self, min_elems=50):
+        pass
+
 class Graph(object):
     def __init__(self, vertices_map):
         self.vertices = {}
@@ -63,8 +107,9 @@ class Graph(object):
         self.sorted_edges = self.__sorted_edges(vertices_map)
 
         for (v1, v2, weight) in self.sorted_edges:
-            self.edges.connect(self.sv_map[v1], self.sv_map[v2], weight)
-            self.edges.connect(self.sv_map[v2], self.sv_map[v1], weight)
+            if v1 in vertices_map and v2 in vertices_map:
+                self.edges.connect(self.sv_map[v1], self.sv_map[v2], weight)
+                self.edges.connect(self.sv_map[v2], self.sv_map[v1], weight)
 
         self.max_edge = self.sorted_edges[-1][2]
         self.singular_vertices_no = len(vertices_map)
@@ -161,7 +206,7 @@ class Graph(object):
 
     def reduce(self, min_elems=50):
         improvable = True
-        while improvable and len(self.vertices) >= min_elems:
+        while improvable and len(self.vertices) > min_elems:
             improvable = False
             if len(self.vertices) > 1:
                 for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
@@ -211,7 +256,10 @@ class Graph(object):
                         improvable = True
                         break
         for v in self.vertices:
-            self.vertices[v] = self.vertices[v].build()
+            if len(self.vertices[v].map) < min_elems:
+                self.vertices[v] = self.vertices[v].build_flat()
+            else:
+                self.vertices[v] = self.vertices[v].build()
             self.vertices[v].reduce(min_elems=min_elems)
 
 
@@ -237,3 +285,6 @@ class SuperVertex(object):
 
     def build(self):
         return Graph(self.map)
+
+    def build_flat(self):
+        return FlatGraph(self.map)
