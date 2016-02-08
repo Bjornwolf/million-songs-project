@@ -1,3 +1,50 @@
+class Graph(object):
+    def __init__(self, vertices):
+        self.sorted_edges = self._build_edge_list(vertices.values())
+        self.vertices = []
+        self.sv_map = {}
+        self.edges = {}
+        self.singular_vertices = 0
+
+        for v in vertices:
+            sv = SuperVertex(vertices[v])
+            self.supervertex_mapping[v] = sv.identity
+            self.vertices.append(sv)
+            self.singular_vertices += 1
+        for (v1, v2, weight) in self.sorted_edges:
+            try:
+                self.edges[sv_map[v1]].append((sv_map[v2], weight))
+            except KeyError:
+                self.edges[sv_map[v1]] = [(sv_map[v2], weight)]
+
+        self.max_edge = self.sorted_edges[-1][2] 
+
+        self.within_cluster_distance = 0.
+        self.cluster_edginess = 
+        self.between_cluster_distance = 
+
+    def size(self):
+        return len(self.vertices)
+
+    def _build_edges_list(self, train_data):
+        edges = set()
+        for track in train_data:
+            self._edges_from_similars(track, edges)
+
+        return sorted(edges, lambda x: x[2])
+
+    def _edges_from_similars(self, track, edges): 
+        for similar in track['similars']:
+            edges.add(self._edge(track, similar))
+
+    def _edge(self, track, similar):
+        return (min(track['trackid'], similar[0]), 
+                max(track['trackid'], similar[0]),
+                self._edge_weight(similar[1]))
+
+    def _edge_weight(self, similarity):
+        return 1 / similarity
+
 class GraphSquasher(object):
     def __init__(self, radius):
         self.membership_lookup = dict() 
@@ -20,24 +67,6 @@ class GraphSquasher(object):
     def _should_merge(self, v1, v2, weight):
         pass
 
-    def _build_edges_list(self, train_data):
-        edges = set()
-        for track in train_data:
-            self._edges_from_similars(track, edges)
-
-        return sorted(edges, lambda x: x[2])
-
-    def _edges_from_similars(self, track, edges): 
-        for similar in track['similars']:
-            edges.add(self._edge(track, similar))
-
-    def _edge(self, track, similar):
-        return (min(track['trackid'], similar[0]), 
-                max(track['trackid'], similar[0]),
-                self._edge_weight(similar[1]))
-
-    def _edge_weight(self, similarity):
-        return 1 / similarity
 
     def _merge_target(self, v1, v2, weight):
        sv1 = self.membership_lookup.get(v1['track_id'], v1)
