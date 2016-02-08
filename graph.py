@@ -8,6 +8,9 @@ class Graph(object):
     def loss_change(self, vertex):
         pass
 
+    def extend(self, vertex):
+        pass
+
     def reduce(self):
         pass
 
