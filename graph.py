@@ -5,7 +5,7 @@ class Graph(object):
     def loss(self):
         pass
 
-    def loss_change(self):
+    def loss_change(self, vertex):
         pass
 
     def reduce(self):
