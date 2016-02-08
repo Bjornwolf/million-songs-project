@@ -9,12 +9,17 @@ class SmartEdge(object):
         self.min_edge = min(self.min_edge, weight)
         self.max_edge = max(self.max_edge, weight)
 
+    def __repr__(self):
+        return "(%.2f, %.2f)" % (self.min_edge, self.max_edge)
+
 class EdgeMap(object):
     def __init__(self):
         self.edges = {}
 
     def merge(self, edge_map, source_key, new_key):
-        pass         
+        for v in edge_map[source_key]:
+            self.connect(new_key, v, edge_map[source_key][v].min_edge)
+            self.connect(new_key, v, edge_map[source_key][v].max_edge)
 
     def connect(self, v1, v2, weight):
         if v1 not in self.edges:
@@ -39,6 +44,9 @@ class EdgeMap(object):
 
     def values(self):
         return self.edges.values()
+
+    def debug(self):
+        print self.edges
 
 class Graph(object):
     def __init__(self, vertices_map):
@@ -106,25 +114,28 @@ class Graph(object):
         b_diff = self.max_edge * size_one_svs
 
         merged_edges = self.merge_edges(sv1_id, sv2_id)
-        c_diff = total_size * len(merged_edges[sv1_id, sv2_id]) 
-        c_diff -= sv1_size * len(self.edges[sv1_id])
-        c_diff -= sv2_size * len(self.edges[sv2_id])
-        doubled = list(set(self.edges[sv1_id].keys()) & set(self.edges[sv2_id].keys()))
-        for v in doubled:
-            c_diff -= len(self.edges[v]) - 1
-
+        if (sv1_id, sv2_id) in merged_edges:
+            c_diff = total_size * len(merged_edges[sv1_id, sv2_id]) 
+            c_diff -= sv1_size * len(self.edges[sv1_id])
+            c_diff -= sv2_size * len(self.edges[sv2_id])
+            doubled = list(set(self.edges[sv1_id].keys()) & set(self.edges[sv2_id].keys()))
+            for v in doubled:
+                c_diff -= len(self.edges[v]) - 1
+        else:
+            c_diff = 0
 
         d_diff = 0.
-        for v in merged_edges[sv1_id, sv2_id]:
-            d_diff += (total_size + self.vertices[v].count()) * merged_edges[sv1_id, sv2_id][v].min_edge
-        for v in self.edges[sv1_id]:
-            d_diff -= (sv1_size + self.vertices[v].count()) * self.edges[sv1_id][v].min_edge
-        for v in self.edges[sv2_id]:
-            d_diff -= (sv2_size + self.vertices[v].count()) * self.edges[sv2_id][v].min_edge
-        try:
-            d_diff -= total_size * self.edges[sv1_id][sv2_id].min_edge
-        except KeyError:
-            pass
+        if (sv1_id, sv2_id) in merged_edges:
+            for v in merged_edges[sv1_id, sv2_id]:
+                d_diff += (total_size + self.vertices[v].count()) * merged_edges[sv1_id, sv2_id][v].min_edge
+            for v in self.edges[sv1_id]:
+                d_diff -= (sv1_size + self.vertices[v].count()) * self.edges[sv1_id][v].min_edge
+            for v in self.edges[sv2_id]:
+                d_diff -= (sv2_size + self.vertices[v].count()) * self.edges[sv2_id][v].min_edge
+            try:
+                d_diff -= total_size * self.edges[sv1_id][sv2_id].min_edge
+            except KeyError:
+                pass
         loss, a, b, c, d = self.loss()
 
         an = a + a_diff
@@ -152,36 +163,51 @@ class Graph(object):
         improvable = True
         while improvable:
             improvable = False
-            for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
-                sv1_id = self.sv_map[v1]
-                sv2_id = self.sv_map[v2]
-                merged_edges = self.merge_edges(sv1_id, sv2_id)
-                new_loss, old_loss, (a, b, c, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
-                if new_loss < old_loss:
-                    self.within_cluster_distance = a
-                    self.singular_vertices_no = b / self.max_edge
-                    self.cluster_edginess = c
-                    self.between_cluster_distance = d
+            if len(self.vertices) > 1:
+                for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
+                    print self.vertices
+                    self.edges.debug()
+                    sv1_id = self.sv_map[v1]
+                    sv2_id = self.sv_map[v2]
+                    merged_edges = self.merge_edges(sv1_id, sv2_id)
 
-                    new_sv = SuperVertex()
-                    for k in self.vertices[sv1_id].map:
-                        new_sv.add(self.vertices[sv1_id].map[k])
-                    for k in self.vertices[sv2_id].map:
-                        new_sv.add(self.vertices[sv2_id].map[k])
-                    new_id = new_sv.identity
-                    self.vertices[new_id] = new_sv
-                    for v in new_sv.map:
-                        self.sv_map[v] = new_id
-                    print self.sv_map
-                    self.edges.merge(merged_edges, (sv1_id, sv2_id), new_id)
-                    for v in merged_edges[sv1_id, sv2_id]:
-                        self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v])
-                    self.edges.drop_vertex(sv1_id)
-                    self.edges.drop_vertex(sv2_id)
+                    if sv1_id == sv2_id:
+                        continue
 
-                    del(self.vertices[sv1_id])
-                    del(self.vertices[sv2_id])
-                    
-                    improvable = True
-                    break
+                    new_loss, old_loss, (a, b, c, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
+                    if new_loss < old_loss:
+                        self.within_cluster_distance = a
+                        self.singular_vertices_no = b / self.max_edge
+                        self.cluster_edginess = c
+                        self.between_cluster_distance = d
+
+                        new_sv = SuperVertex()
+                        for k in self.vertices[sv1_id].map:
+                            new_sv.add(self.vertices[sv1_id].map[k])
+                        for k in self.vertices[sv2_id].map:
+                            new_sv.add(self.vertices[sv2_id].map[k])
+                        new_id = new_sv.identity
+                        self.vertices[new_id] = new_sv
+                        for v in new_sv.map:
+                            self.sv_map[v] = new_id
+                        if (sv1_id, sv2_id) in merged_edges:
+                            self.edges.merge(merged_edges, (sv1_id, sv2_id), new_id)
+                            for v in merged_edges[sv1_id, sv2_id]:
+                                self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v].min_edge)
+                                self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v].max_edge)
+                        
+                        for v in self.edges[sv1_id]:
+                            self.edges.drop(v, sv1_id)
+                        for v in self.edges[sv2_id]:
+                            self.edges.drop(v, sv2_id)
+
+                        self.edges.drop_vertex(sv1_id)
+                        self.edges.drop_vertex(sv2_id)
+
+
+                        del(self.vertices[sv1_id])
+                        del(self.vertices[sv2_id])
+                        
+                        improvable = True
+                        break
 
