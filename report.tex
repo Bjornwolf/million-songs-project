@@ -39,6 +39,20 @@ Celem projektu jest stworzenie systemu rekomendującego działającego na powyż
 Zadanie jest trudne ze względu na rzadkość i niekompletność macierzy tagów i podobieństwa.
 
 \section{Użyte metody}
+Dane są rzadkie, więc wektoryzacja piosenek na podstawie tagów nie wchodziła w grę. 
+Struktura \textbf{similars} przywodzi na myśl graf, dzięki czemu można uzupełnić macierz podobieństwa choćby za pomocą obliczenia przechodniego domknięcia.
+Ponieważ w grafach naturalną miarą jest odległość, przeszliśmy z opisu opartego na podobieństwach na odległości według wzoru
+\begin{equation}
+ distance(x, y) = \frac{1}{similarity(x, y)}
+\end{equation}
+
+Metody wyznaczania przechodniego domknięcia grafu mają złożoność sześcienną względem liczby wierzchołków w grafie, 
+więc aby którąś zastosować, należy zmniejszyć graf.
+
+Pomysł na redukcję grafu wywodzi się z grupowania hierarchicznego.
+Gęste skupiska punktów można reprezentować przy pomocy pojedynczych superwierzchołków, w których rozwiązywany będzie podobny problem dla tego skupiska.
+Na tak wyznaczonych grafach hierarchicznych można już wyznaczyć przechodnie domknięcia.
+
 \section{Implementacja}
 \section{Wyniki}
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
