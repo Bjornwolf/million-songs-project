@@ -1,5 +1,3 @@
-# from super_vertex import SuperVertex
-
 class SmartEdge(object):
     def __init__(self):
         self.min_edge = float("inf")
@@ -70,7 +68,7 @@ class FlatGraph(object):
         if len(self.sorted_edges) != 0:
             self.max_edge = self.sorted_edges[-1][2]
         else:
-            self.max_edge = float("inf")
+            self.max_edge = 0. 
         self.singular_vertices_no = len(vertices_map)
         self.within_cluster_distance = 0.
         self.cluster_edginess = sum(map(len, self.edges.values()))
@@ -117,7 +115,7 @@ class Graph(object):
         if len(self.sorted_edges) != 0:
             self.max_edge = self.sorted_edges[-1][2]
         else:
-            self.max_edge = float("inf")
+            self.max_edge = 0.
         self.singular_vertices_no = len(vertices_map)
         self.within_cluster_distance = 0.
         self.cluster_edginess = sum(map(len, self.edges.values()))
@@ -269,8 +267,6 @@ class Graph(object):
                 self.vertices[v] = self.vertices[v].build()
             self.vertices[v].reduce(min_elems=min_elems)
 
-
-# from graph import Graph
 
 class SuperVertex(object):
     ID = 0
