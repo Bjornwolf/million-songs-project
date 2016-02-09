@@ -1,0 +1,45 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage[polish]{babel}
+
+% Title Page
+\title{Projekt z eksploracji danych}
+\author{Filip Chudy, Marcin Grzywaczewski}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+\section{Opis danych i badanego zagadnienia}
+\subsection{Dane}
+W projekcie wykorzystany został Million Songs Dataset (Last.fm). 
+Składa się on z informacji na temat miliona piosenek.
+Każda piosenka reprezentowana jest jako JSON z następującymi elementami:
+\begin{itemize}
+ \item track\_id -- string, unikalny identyfikator piosenki
+ \item similars -- lista par (track\_id, float) określająca podobieństwa między piosenkami wraz z ich ważnością (0-1)
+ \item tags -- lista par (string, float) określająca tagi przypisane utworowi wraz z ich ważnością (0-100)
+ \item artist -- string, nazwa artysty
+ \item title -- string, tytuł piosenki
+ \item timestamp -- string, czas zebrania danych
+\end{itemize}
+
+Z naszego punktu widzenia pole \textbf{timestamp} jest nieistotne.
+Pola \textbf{artist} i \textbf{title} służą jedynie do prezentacji wyników.
+Liczba utworów podobnych i podanych tagów jest zmienna, w szczególności mogą się zdarzyć takie utwory, które nie mają podanych tagów.
+Liczba piosenek podanych w similars nie jest zbyt duża, co obrazuje histogram.
+% TODO histogram
+
+\subsection{Cel}
+Celem projektu jest stworzenie systemu rekomendującego działającego na powyższych danych.
+Zadanie jest trudne ze względu na rzadkość i niekompletność macierzy tagów i podobieństwa.
+
+\section{Użyte metody}
+\section{Implementacja}
+\section{Wyniki}
+\section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
+\end{document}          
