@@ -52,11 +52,6 @@ class EdgeMap(object):
         #print self.edges
         pass
 
-class FlatGraph(Graph):
-    def reduce(self, min_elems=50):
-        #print "* Flat graph reduce is no-op."
-        pass
-
 class Graph(object):
     def __init__(self, vertices_map):
         self.vertices = {}
@@ -179,21 +174,21 @@ class Graph(object):
         return edges
 
     def distance_matrix(self):
-       matrix = np.array(shape=(len(self.vertices), len(self.vertices)), 
-                         dtype=np.float_)
-       matrix.fill(float("inf"))
-       np.fill_diagonal(matrix, 0)
+        matrix = np.array(shape=(len(self.vertices), len(self.vertices)), 
+                          dtype=np.float_)
+        matrix.fill(float("inf"))
+        np.fill_diagonal(matrix, 0)
 
-       next_id = 0
-       vertices_numbering = {}
-       for i in self.vertices:
+        next_id = 0
+        vertices_numbering = {}
+        for i in self.vertices:
            vertices_numbering[i] = next_id
            next_id += 1
 
-       for (v1, v2, cost) in self.edges.min_edges_list():
-           v1pos = vertices_numbering[v1]
-           v2pos = vertices_numbering[v2]
-           matrix[v1pos, v2pos] = cost
+        for (v1, v2, cost) in self.edges.min_edges_list():
+            v1pos = vertices_numbering[v1]
+            v2pos = vertices_numbering[v2]
+            matrix[v1pos, v2pos] = cost
 
         for u in self.vertices:
             for v1 in self.vertices:
@@ -277,6 +272,10 @@ class Graph(object):
                 self.vertices[v] = self.vertices[v].build()
             self.vertices[v].reduce(min_elems=min_elems)
 
+class FlatGraph(Graph):
+    def reduce(self, min_elems=50):
+        #print "* Flat graph reduce is no-op."
+        pass
 
 class SuperVertex(object):
     ID = 0
