@@ -47,7 +47,7 @@ class EdgeMap(object):
         print self.edges
 
 class FlatGraph(object):
-    def __init__(self, vertices_map):
+    def __init__(self, vertices_map, sv_map=None):
         self.vertices = {}
         self.sv_map = {}
         self.edges = EdgeMap()
@@ -94,7 +94,7 @@ class FlatGraph(object):
         print "* Flat graph reduce is no-op."
 
 class Graph(object):
-    def __init__(self, vertices_map):
+    def __init__(self, vertices_map, sv_map=None):
         self.vertices = {}
         self.sv_map = {}
         self.edges = EdgeMap()
@@ -105,7 +105,7 @@ class Graph(object):
             self.sv_map[v] = sv.identity
             self.vertices[sv.identity] = sv
 
-        self.sorted_edges = self.__sorted_edges(vertices_map)
+        self.sorted_edges = self.__sorted_edges(vertices_map, sv_map)
 
         for (v1, v2, weight) in self.sorted_edges:
             if v1 in vertices_map and v2 in vertices_map:
@@ -122,14 +122,20 @@ class Graph(object):
         self.between_cluster_distance = 2. * sum(map(lambda x: x[2], 
                                                  self.sorted_edges))
 
-    def __sorted_edges(self, vertices_map):
+    def __sorted_edges(self, vertices_map, sv_map=None):
         s = set()
 
         for key in vertices_map:
             for similar in vertices_map[key]['similars']:
                 track = vertices_map[key]
-                s.add((min(track['track_id'], similar[0]),
-                       max(track['track_id'], similar[0]),
+                if sv_map is not None:
+                    first_vertex = sv_map[track['track_id']]
+                    second_vertex = sv_map[similar[0]]
+                else:
+                    first_vertex = track['track_id']
+                    second_vertex = similar[0]
+                s.add((min(first_vertex, second_vertex),
+                       max(first_vertex, second_vertex),
                        1 / similar[1]))
 
         return sorted(s, key=lambda x: x[2])
@@ -223,8 +229,10 @@ class Graph(object):
                 position_to_pop = None
                 for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
                     if len(self.vertices) < 10:
+                        print self.sv_map
                         print self.vertices
                         self.edges.debug()
+                        print self.sorted_edges
                     sv1_id = self.sv_map[v1]
                     sv2_id = self.sv_map[v2]
                     merged_edges = self.merge_edges(sv1_id, sv2_id)
@@ -276,9 +284,9 @@ class Graph(object):
         
         for v in self.vertices:
             if len(self.vertices[v].map) < min_elems:
-                self.vertices[v] = self.vertices[v].build_flat()
+                self.vertices[v] = self.vertices[v].build_flat(self.sv_map)
             else:
-                self.vertices[v] = self.vertices[v].build()
+                self.vertices[v] = self.vertices[v].build(self.sv_map)
             self.vertices[v].reduce(min_elems=min_elems)
 
 
@@ -300,8 +308,8 @@ class SuperVertex(object):
     def count(self):
         return len(self.map.keys())
 
-    def build(self):
-        return Graph(self.map)
+    def build(self, sv_map):
+        return Graph(self.map, sv_map=sv_map)
 
-    def build_flat(self):
-        return FlatGraph(self.map)
+    def build_flat(self, sv_map):
+        return FlatGraph(self.map, sv_map=sv_map)
