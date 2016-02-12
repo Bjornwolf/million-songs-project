@@ -1,0 +1,9 @@
+* Reduce memory footprint of the whole implementation (on 1kk set it's taking 21
+GiBs just for data)
+* Analyze how well graph will get reduced
+* Create code for determining distinct sets on a graph (making it a forest)
+* Reduce each graph from forest
+* Perform FW algorithm to create distance matrix
+* Perform MDS to fill gaps in a distance matrix
+* Present results
+* Make a simple content-based recommendation system
