@@ -52,50 +52,7 @@ class EdgeMap(object):
         #print self.edges
         pass
 
-class FlatGraph(object):
-    def __init__(self, vertices_map):
-        self.vertices = {}
-        self.sv_map = {}
-        self.edges = EdgeMap()
-
-        for v in vertices_map:
-            sv = SuperVertex()
-            sv.add(vertices_map[v])
-            self.sv_map[v] = sv.identity
-            self.vertices[sv.identity] = sv
-
-        self.sorted_edges = self.__sorted_edges(vertices_map)
-
-        for (v1, v2, weight) in self.sorted_edges:
-            if v1 in vertices_map and v2 in vertices_map:
-                self.edges.connect(self.sv_map[v1], self.sv_map[v2], weight)
-                self.edges.connect(self.sv_map[v2], self.sv_map[v1], weight)
-
-        if len(self.sorted_edges) != 0:
-            self.max_edge = self.sorted_edges[-1][2]
-        else:
-            self.max_edge = 0. 
-        self.singular_vertices_no = len(vertices_map)
-        self.within_cluster_distance = 0.
-        self.cluster_edginess = sum(map(len, self.edges.values()))
-        self.between_cluster_distance = 2. * sum(map(lambda x: x[2], 
-                                                 self.sorted_edges))
-
-    def __sorted_edges(self, vertices_map):
-        s = set()
-
-        for key in vertices_map:
-            for similar in vertices_map[key]['similars']:
-                track = vertices_map[key]
-                s.add((min(track['track_id'], similar[0]),
-                       max(track['track_id'], similar[0]),
-                       1 / similar[1]))
-
-        return sorted(s, key=lambda x: x[2])
-
-    def has_vertex(self, vertex_id):
-        return vertex_id in self.sv_map
-
+class FlatGraph(Graph):
     def reduce(self, min_elems=50):
         #print "* Flat graph reduce is no-op."
         pass
