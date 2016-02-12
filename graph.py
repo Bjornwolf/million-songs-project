@@ -1,3 +1,5 @@
+import numpy as np
+
 class SmartEdge(object):
     def __init__(self):
         self.min_edge = float("inf")
@@ -27,6 +29,9 @@ class EdgeMap(object):
             self.edges[v1][v2] = SmartEdge()
 
         self.edges[v1][v2].add(weight)
+
+    def min_edges_list(self):
+        return [(v1, v2, self.edges[v1][v2].min_edge) for v1 in self.edges for v2 in self.edges[v1]]
 
     def drop_vertex(self, v):
         del self.edges[v]
@@ -215,6 +220,33 @@ class Graph(object):
                     edges.connect((sv1_id, sv2_id), v, self.edges[sv2_id][v].max_edge)
 
         return edges
+
+    def distance_matrix(self):
+       matrix = np.array(shape=(len(self.vertices), len(self.vertices)), 
+                         dtype=np.float_)
+       matrix.fill(float("inf"))
+       np.fill_diagonal(matrix, 0)
+
+       next_id = 0
+       vertices_numbering = {}
+       for i in self.vertices:
+           vertices_numbering[i] = next_id
+           next_id += 1
+
+       for (v1, v2, cost) in self.edges.min_edges_list():
+           v1pos = vertices_numbering[v1]
+           v2pos = vertices_numbering[v2]
+           matrix[v1pos, v2pos] = cost
+
+        for u in self.vertices:
+            for v1 in self.vertices:
+                for v2 in self.vertices:
+                    upos = vertices_numbering[u]
+                    v1pos = vertices_numbering[v1]
+                    v2pos = vertices_numbering[v2]
+                    matrix[v1pos, v2pos] = min(through_u, matrix[v1pos, v2pos])
+
+        return matrix, vertices_numbering
 
     def reduce(self, min_elems=50):
         improvable = True
