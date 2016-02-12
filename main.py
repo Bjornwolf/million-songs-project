@@ -4,6 +4,7 @@ from load_data import load_data
 import yaml
 import sys
 import matplotlib.pyplot as plt
+from collections import Counter
 
 config_dict = yaml.load(open(sys.argv[1], 'r'))
 print config_dict
@@ -36,4 +37,17 @@ def similars_hist(train_vertices_map):
 
 g = Graph(train_vertices_map)
 g.reduce(min_elems=50)
-print len(g.vertices)
+
+clusters = []
+
+def count_clusters(vertices, clusters):
+    clusters.append(len(vertices))
+
+    for v in vertices:
+        if hasattr(vertices[v], 'vertices'):
+            count_clusters(vertices[v].vertices, clusters)
+
+count_clusters(g.vertices, clusters)
+
+print Counter(clusters)
+
