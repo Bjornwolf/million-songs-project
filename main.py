@@ -35,5 +35,5 @@ def similars_hist(train_vertices_map):
     plt.show()
 
 g = Graph(train_vertices_map)
-g.reduce(min_elems=2)
-print g.vertices
+g.reduce(min_elems=50)
+print len(g.vertices)
