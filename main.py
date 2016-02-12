@@ -36,7 +36,7 @@ def similars_hist(train_vertices_map):
     plt.show()
 
 g = Graph(train_vertices_map)
-g.reduce(min_elems=50)
+g.reduce(min_elems=500)
 
 clusters = []
 
@@ -48,6 +48,6 @@ def count_clusters(vertices, clusters):
             count_clusters(vertices[v].vertices, clusters)
 
 count_clusters(g.vertices, clusters)
-
+clusters = [len(g.vertices[x].vertices) for x in g.vertices]
 print Counter(clusters)
 
