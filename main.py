@@ -15,7 +15,7 @@ similarity_threshold = config_dict['similarity_threshold']
 train_data, train_tags, test_data, test_tags = load_data(train_path, test_path,
         similarity_threshold)
 
-print "* Data loaded"
+print "* Data loaded (%d entries)" % (len(train_data))
 train_vertices_map = {}
 for v in train_data:
     train_vertices_map[v['track_id']] = v

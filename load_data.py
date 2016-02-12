@@ -14,8 +14,12 @@ def load_data(train_set_dir, test_set_dir, similarity_threshold):
     for track_file in train_files:
         handler = open(track_file, 'r')
         track = json.load(handler)
+        if len(track["similars"]) == 0:
+            continue
+        
         track["similars"] = filter(lambda similar: similar[1] > similarity_threshold, track["similars"]) 
         train_data.append(track)
+
         if len(track["tags"]) == 0:
             if None not in test_tags:
                 train_tags[None] = (0, [])

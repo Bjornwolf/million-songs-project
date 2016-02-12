@@ -65,7 +65,7 @@ class Graph(object):
             self.vertices[sv.identity] = sv
             if len(vertices_map[v]['similars']) == 0:
                 empties += 1
-        print empties
+        print "Empties:", empties
 
         self.sorted_edges = self.__sorted_edges(vertices_map)
 
