@@ -264,7 +264,8 @@ class Graph(object):
                         break
                 if position_to_pop is not None:
                     #self.sorted_edges.pop(position_to_pop)
-                    self.sorted_edges = self.sorted_edges[position_to_pop+1:]
+                    #self.sorted_edges = self.sorted_edges[position_to_pop+1:]
+                    self.sorted_edges = self.sorted_edges[position_to_pop+1:] + self.sorted_edges[:position_to_pop]
         
         for v in self.vertices:
             if len(self.vertices[v].map) < min_elems:
