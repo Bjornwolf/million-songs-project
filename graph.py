@@ -77,9 +77,8 @@ class Graph(object):
             self.max_edge = 0.
         self.singular_vertices_no = len(vertices_map)
         self.within_cluster_distance = 0.
-        self.cluster_edginess = sum(map(len, self.edges.values()))
-        self.between_cluster_distance = 2. * sum(map(lambda x: x[2], 
-                                                 self.sorted_edges))
+        self.between_cluster_distance = sum(map(lambda x: x[2],
+                                                self.sorted_edges))
 
     def __sorted_edges(self, vertices_map):
         s = set()
@@ -102,9 +101,8 @@ class Graph(object):
     def loss(self):
         a = self.within_cluster_distance
         b = self.max_edge * self.singular_vertices_no
-        c = self.cluster_edginess
         d = self.between_cluster_distance
-        return (a + b) * c / d, a, b, c, d
+        return (a + 300. * b) / d, a, b, d
 
     def loss_change(self, sv1_id, sv2_id, merged_edges):
         sv1_max_edge = self.vertices[sv1_id].max_edge
@@ -114,9 +112,9 @@ class Graph(object):
         sv2_size = self.vertices[sv2_id].count()
         total_size = sv1_size + sv2_size
 
-        a_diff = total_size * new_max_edge
-        a_diff -= sv1_size * sv1_max_edge
-        a_diff -= sv2_size * sv2_max_edge
+        a_diff = new_max_edge
+        a_diff -= sv1_max_edge
+        a_diff -= sv2_max_edge
         size_one_svs = 0
         if self.vertices[sv1_id].count() == 1:
             size_one_svs -= 1
@@ -125,36 +123,26 @@ class Graph(object):
         b_diff = self.max_edge * size_one_svs
 
         merged_edges = self.merge_edges(sv1_id, sv2_id)
-        if (sv1_id, sv2_id) in merged_edges:
-            c_diff = total_size * len(merged_edges[sv1_id, sv2_id]) 
-            c_diff -= sv1_size * len(self.edges[sv1_id])
-            c_diff -= sv2_size * len(self.edges[sv2_id])
-            doubled = list(set(self.edges[sv1_id].keys()) & set(self.edges[sv2_id].keys()))
-            for v in doubled:
-                c_diff -= len(self.edges[v]) - 1
-        else:
-            c_diff = 0
 
         d_diff = 0.
         if (sv1_id, sv2_id) in merged_edges:
-            for v in merged_edges[sv1_id, sv2_id]:
-                d_diff += (total_size + self.vertices[v].count()) * merged_edges[sv1_id, sv2_id][v].min_edge
             for v in self.edges[sv1_id]:
-                d_diff -= (sv1_size + self.vertices[v].count()) * self.edges[sv1_id][v].min_edge
+                d_diff -= self.edges[sv1_id][v].min_edge
             for v in self.edges[sv2_id]:
-                d_diff -= (sv2_size + self.vertices[v].count()) * self.edges[sv2_id][v].min_edge
+                d_diff -= self.edges[sv2_id][v].min_edge
+            for v in merged_edges[sv1_id, sv2_id]:
+                d_diff += merged_edges[sv1_id, sv2_id][v].min_edge
             try:
-                d_diff -= total_size * self.edges[sv1_id][sv2_id].min_edge
+                d_diff += self.edges[sv1_id][sv2_id].min_edge
             except KeyError:
                 pass
-        loss, a, b, c, d = self.loss()
+        loss, a, b, d = self.loss()
 
         an = a + a_diff
         bn = b + b_diff
-        cn = c + c_diff
         dn = d + d_diff
 
-        return (an + bn) * cn / dn, loss, (an, bn, cn, dn)
+        return (an + 300. * bn) / dn, loss, (an, bn, dn)
 
     def merge_edges(self, sv1_id, sv2_id):
         edges = EdgeMap()
@@ -163,7 +151,6 @@ class Graph(object):
                 if v != sv2_id:
                     edges.connect((sv1_id, sv2_id), v, self.edges[sv1_id][v].min_edge)
                     edges.connect((sv1_id, sv2_id), v, self.edges[sv1_id][v].max_edge)
-
 
         if sv2_id in self.edges:
             for v in self.edges[sv2_id]:
@@ -224,12 +211,11 @@ class Graph(object):
                     if sv1_id == sv2_id:
                         continue
 
-                    new_loss, old_loss, (a, b, c, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
+                    new_loss, old_loss, (a, b, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
                     if new_loss < old_loss:
-                        #print "* Merging. Old loss: %.2f. New loss: %.2f; NTH element: %d" % (old_loss,  new_loss, i)
+                        print "* Merging. Old loss: %.5f. New loss: %.5f; NTH element: %d" % (old_loss,  new_loss, i)
                         self.within_cluster_distance = a
                         self.singular_vertices_no = b / self.max_edge
-                        self.cluster_edginess = c
                         self.between_cluster_distance = d
 
                         new_sv = SuperVertex()
