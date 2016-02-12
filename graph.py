@@ -91,7 +91,7 @@ class FlatGraph(object):
         return vertex_id in self.sv_map
 
     def reduce(self, min_elems=50):
-        pass
+        print "* Flat graph reduce is no-op."
 
 class Graph(object):
     def __init__(self, vertices_map):
@@ -213,10 +213,18 @@ class Graph(object):
 
     def reduce(self, min_elems=50):
         improvable = True
+        iterations = 0
         while improvable and len(self.vertices) > min_elems:
+            print "* Iteration %d" % (iterations)
+            print "* Vertices: %d" % len(self.vertices)
+
             improvable = False
             if len(self.vertices) > 1:
+                position_to_pop = None
                 for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
+                    if len(self.vertices) < 10:
+                        print self.vertices
+                        self.edges.debug()
                     sv1_id = self.sv_map[v1]
                     sv2_id = self.sv_map[v2]
                     merged_edges = self.merge_edges(sv1_id, sv2_id)
@@ -226,6 +234,7 @@ class Graph(object):
 
                     new_loss, old_loss, (a, b, c, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
                     if new_loss < old_loss:
+                        print "* Merging. Old loss: %.2f. New loss: %.2f; NTH element: %d" % (old_loss,  new_loss, i)
                         self.within_cluster_distance = a
                         self.singular_vertices_no = b / self.max_edge
                         self.cluster_edginess = c
@@ -258,8 +267,13 @@ class Graph(object):
                         del(self.vertices[sv2_id])
                         
                         improvable = True
+                        iterations += 1
+                        position_to_pop = i
                         break
-
+                if position_to_pop is not None:
+                    #self.sorted_edges.pop(position_to_pop)
+                    self.sorted_edges = self.sorted_edges[position_to_pop+1:]
+        
         for v in self.vertices:
             if len(self.vertices[v].map) < min_elems:
                 self.vertices[v] = self.vertices[v].build_flat()

@@ -14,16 +14,19 @@ similarity_threshold = config_dict['similarity_threshold']
 train_data, train_tags, test_data, test_tags = load_data(train_path, test_path,
         similarity_threshold)
 
+print "* Data loaded"
 train_vertices_map = {}
 for v in train_data:
     train_vertices_map[v['track_id']] = v
 
+print "* Train vertices map generated"
 # Clearing out vertices existing in similars, but not in dataset.
 for v in train_vertices_map:
     similars = train_vertices_map[v]['similars']
     is_internal = lambda x: x[0] in train_vertices_map 
     train_vertices_map[v]['similars'] = filter(is_internal, similars)
 
+print "* Cleaned up vertices map"
 def similars_hist(train_vertices_map):
     counts = []
     for v in train_vertices_map:
