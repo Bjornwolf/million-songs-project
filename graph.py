@@ -174,8 +174,7 @@ class Graph(object):
         return edges
 
     def distance_matrix(self):
-        matrix = np.array(shape=(len(self.vertices), len(self.vertices)), 
-                          dtype=np.float_)
+        matrix = np.ndarray(shape=(len(self.vertices), len(self.vertices)), dtype=float)
         matrix.fill(float("inf"))
         np.fill_diagonal(matrix, 0)
 
@@ -196,6 +195,8 @@ class Graph(object):
                     upos = vertices_numbering[u]
                     v1pos = vertices_numbering[v1]
                     v2pos = vertices_numbering[v2]
+
+                    through_u = matrix[v1pos, u] + matrix[u, v2pos]
                     matrix[v1pos, v2pos] = min(through_u, matrix[v1pos, v2pos])
 
         return matrix, vertices_numbering
