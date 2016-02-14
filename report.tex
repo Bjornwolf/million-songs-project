@@ -57,11 +57,23 @@ Na tak wyznaczonych grafach hierarchicznych można już wyznaczyć przechodnie d
 
 \subsection{Algorytm hierarchiczny}
 Algorytm kompresujący graf jest bardzo podobny w działaniu do algorytmów grupowania hierarchicznego.
-Każdemu grafowi przypisujemy koszt według pewnej funkcji błędu $F$.
+Dane będą reprezentowane przez graf. Jego wierzchołki odpowiadają piosenkom lub ich zbiorom, a krawędzie -- odległościom między nimi.
+W wierzchołkach grafu będzie przechowywana mniejsza wersja rozwiązywanego problemu.
 
-Graf $G_1 = (V_1, E_1)$ jest przodkiem grafu $G_2 = (V_2, E_2)$, jeżeli istnieje taka krawędź $(v_i, v_j) \in E_1$, że $V_1 \setminus \{v_i, v_j\} \subseteq V_2$, 
-$V_2 \setminus V_1 = \{v_k\}$ i $inner\_vertices(v_k) = inner\_vertices(v_i) \cup inner\_vertices(v_j)$. 
+Graf $G_1 = (V_1, E_1)$ jest przodkiem grafu $G_2 = (V_2, E_2)$, jeżeli istnieje taka krawędź $e(v_i, v_j) \in E_1$, że $V_1 \setminus \{v_i, v_j\} \subseteq V_2$, 
+$V_2 \setminus V_1 = \{v_k\}$ i $inner\_vertices(v_k) = inner\_vertices(v_i) \cup inner\_vertices(v_j)$.\linebreak
+Dodatkowo $(\forall w \in \{v: e(v_i, v) \in E_1 \vee e(v_j, v) \in E_1\})~e(v_k, w) \in E_2 \wedge |e(v_k, w)| = \min \{|e(u, w)| : u \in \{v_i, v_j\}\}$.
 $G_2$ nazywamy potomkiem grafu $G_1$, jeśli $G_1$ jest przodkiem $G_2$.
+
+Innymi słowy dla każdej krawędzi $e$ w grafie $G_1$ istnieje potomek $G_2$ grafu $G_1$ powstały przez scalenie wierzchołków łączonych przez $e$.
+Oczywiście każda krawędź w grafie jednoznacznie wyznacza odpowiadającego jej potomka.
+
+Każdemu grafowi przypisujemy koszt według pewnej funkcji błędu $F$.
+W każdej iteracji wybieramy pewnego potomka $G_2$ grafu $G_1$ pod warunkiem, że $F(G_2) < F(G_1)$.
+Ponieważ wyznaczanie wartości funkcji $F$ dla każdego potomka grafu $G_1$ byłoby kosztowne obliczeniowo, zastosowaliśmy wybór heurystyczny.
+Wybieramy najkrótszą taką krawędź $e(v_i, v_j)$, że graf $G_{ij}$ powstały przez scalenie $v_i$ i $v_j$ ma niższą funkcję błędu niż jego przodek.
+
+Wybór kończymy, jeśli każdy potomek grafu ma nie mniejszy koszt niż jego przodek lub przekroczymy minimalną wielkość grafu (parametr algorytmu).
 
 \subsection{Funkcja kosztu}
 Funkcja kosztu składa się z trzech czynników: WCD (rozmiary wewnętrzne superwierzchołków), 
@@ -106,7 +118,11 @@ Niech $G_2$ będzie potomkiem $G_1$ łączącym $c_i, c_j \in G_1$ w $c_k \in G_
  \end{split}
 \end{equation}
 
+Dzięki temu obliczanie funkcji kosztu dla kolejnych potomków grafu jest znacznie szybsze.
+
 \section{Implementacja}
+
+TODO liczenie iteracji jak powyżej bolało, więc ucinamy listę znacznie bardziej chamsko
 \section{Wyniki}
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
 \end{document}          
