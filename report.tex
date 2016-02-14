@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{polski}
 \usepackage[polish]{babel}
+\usepackage{amsmath}
 
 % Title Page
 \title{Projekt z eksploracji danych}
@@ -39,6 +40,7 @@ Celem projektu jest stworzenie systemu rekomendującego działającego na powyż
 Zadanie jest trudne ze względu na rzadkość i niekompletność macierzy tagów i podobieństwa.
 
 \section{Użyte metody}
+\subsection{Wstęp}
 Dane są rzadkie, więc wektoryzacja piosenek na podstawie tagów nie wchodziła w grę. 
 Struktura \textbf{similars} przywodzi na myśl graf, dzięki czemu można uzupełnić macierz podobieństwa choćby za pomocą obliczenia przechodniego domknięcia.
 Ponieważ w grafach naturalną miarą jest odległość, przeszliśmy z opisu opartego na podobieństwach na odległości według wzoru
@@ -52,6 +54,57 @@ więc aby którąś zastosować, należy zmniejszyć graf.
 Pomysł na redukcję grafu wywodzi się z grupowania hierarchicznego.
 Gęste skupiska punktów można reprezentować przy pomocy pojedynczych superwierzchołków, w których rozwiązywany będzie podobny problem dla tego skupiska.
 Na tak wyznaczonych grafach hierarchicznych można już wyznaczyć przechodnie domknięcia.
+
+\subsection{Algorytm hierarchiczny}
+Algorytm kompresujący graf jest bardzo podobny w działaniu do algorytmów grupowania hierarchicznego.
+Każdemu grafowi przypisujemy koszt według pewnej funkcji błędu $F$.
+
+Graf $G_1 = (V_1, E_1)$ jest przodkiem grafu $G_2 = (V_2, E_2)$, jeżeli istnieje taka krawędź $(v_i, v_j) \in E_1$, że $V_1 \setminus \{v_i, v_j\} \subseteq V_2$, 
+$V_2 \setminus V_1 = \{v_k\}$ i $inner\_vertices(v_k) = inner\_vertices(v_i) \cup inner\_vertices(v_j)$. 
+$G_2$ nazywamy potomkiem grafu $G_1$, jeśli $G_1$ jest przodkiem $G_2$.
+
+\subsection{Funkcja kosztu}
+Funkcja kosztu składa się z trzech czynników: WCD (rozmiary wewnętrzne superwierzchołków), 
+SVP (penalizacja superwierzchołków jednoelementowych), BCD (odległości między superwierzchołkami).
+
+\begin{equation}
+ WCD(G) = \sum_{c \in C} \max_{e \in E(graph(c)} |e|
+\end{equation}
+\begin{equation}
+ SVP(G) = |\{c \in C : size(c) = 1\}| \times \max_{e \in E(C)} |e|
+\end{equation}
+\begin{equation}
+ BCD(G) = \sum_{c_1 \in C} \sum_{c_2 \in C} |e(c_1, c_2)|
+\end{equation}
+
+Sama funkcja kosztu jest iloczynem tych trzech czynników: $F(G) = WCD(G) \times SVP(G) \times BCD(G)$.
+
+Obliczanie takiej funkcji jest kosztowne, jednak jeśli znamy wartości wszystkich czynników składających się na funkcję kosztu przodka, 
+możemy na ich podstawie efektywnie wyznaczyć czynniki dla potomka.
+
+Niech $G_2$ będzie potomkiem $G_1$ łączącym $c_i, c_j \in G_1$ w $c_k \in G_2$. Można zauważyć, że:
+\begin{equation}
+\begin{split}
+ \Delta WCD(G_2) = WCD(G_2) - WCD(G_1)\\
+ = \sum_{c \in C(G_2)} \max_{e \in E(graph(c))} |e| - \sum_{c \in C(G_1)} \max_{e \in E(graph(c))} |e|\\
+ = \max_{e \in E(graph(v_k))} |e| - \max_{e \in E(graph(v_i))} |e| - \max_{e \in E(graph(v_j))} |e|
+ \end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+ \Delta SVP(G_2) = SVP(G_2) - SVP(G_1)\\
+ = |\{c \in \{v_i, v_j\} : size(c) = 1\}| \times \max_{e \in E(G)} |e|
+ \end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+ \Delta BCD(G_2) = BCD(G_2) - BCD(G_1)\\
+ = \sum_{c_1 \in C_2} \sum_{c_2 \in C_2} |e(c_1, c_2)| - \sum_{c_1 \in C_1} \sum_{c_2 \in C_1} |e(c_1, c_2)|\\
+ = \sum_{c \in C_2} |e(v_k, c)| - \sum_{c \in C_1} |e(v_i, c)| - \sum_{c \in C_1} |e(v_j, c)| + |e(v_i, v_j)|
+ \end{split}
+\end{equation}
 
 \section{Implementacja}
 \section{Wyniki}
