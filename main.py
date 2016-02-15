@@ -11,6 +11,7 @@ config_dict = yaml.load(open(sys.argv[1], 'r'))
 print config_dict
 data_location = config_dict['data_location']
 
+# print "* Data loaded (%d entries)" % (len(data))
 vertices_map = vertices_map_from(load_data(data_location))
 broken, unequal = fix_similarity_symmetry(vertices_map)
 print "* Fixed similarity relation symmetry (%d unidirected, %d unequal)" % (broken, unequal)
@@ -26,8 +27,6 @@ if 'min_elems' in config_dict:
 else:
     forest = Forest(vertices_map)
 forest.build()
-print "* Forest built"
-
 forest.reduce()
 
 print len(forest.elements)

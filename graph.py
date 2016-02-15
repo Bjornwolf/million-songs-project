@@ -1,25 +1,37 @@
 import numpy as np
 
+class SmartEdge(object):
+    def __init__(self):
+        self.min_edge = float("inf")
+        self.max_edge = float("-inf")
+
+    def add(self, weight):
+        self.min_edge = min(self.min_edge, weight)
+        self.max_edge = max(self.max_edge, weight)
+
+    def __repr__(self):
+        return "(%.2f, %.2f)" % (self.min_edge, self.max_edge)
+
 class EdgeMap(object):
     def __init__(self):
         self.edges = {}
 
     def merge(self, edge_map, source_key, new_key):
         for v in edge_map[source_key]:
-            self.connect(new_key, v, edge_map[source_key][v][0])
-            self.connect(new_key, v, edge_map[source_key][v][1])
+            self.connect(new_key, v, edge_map[source_key][v].min_edge)
+            self.connect(new_key, v, edge_map[source_key][v].max_edge)
 
     def connect(self, v1, v2, weight):
         if v1 not in self.edges:
             self.edges[v1] = {}
 
         if v2 not in self.edges[v1]:
-            self.edges[v1][v2] = (float("inf"), float("-inf"))            
+            self.edges[v1][v2] = SmartEdge()
 
-        self.edges[v1][v2] = (min(weight, self.edges[v1][v2][0]), max(weight, self.edges[v1][v2][1]))        
+        self.edges[v1][v2].add(weight)
 
     def min_edges_list(self):
-        return [(v1, v2, self.edges[v1][v2][0]) for v1 in self.edges for v2 in self.edges[v1]]
+        return [(v1, v2, self.edges[v1][v2].min_edge) for v1 in self.edges for v2 in self.edges[v1]]
 
     def drop_vertex(self, v):
         del self.edges[v]
@@ -35,6 +47,10 @@ class EdgeMap(object):
 
     def values(self):
         return self.edges.values()
+
+    def debug(self):
+        #print self.edges
+        pass
 
 class Graph(object):
     def __init__(self, vertices_map):
@@ -65,6 +81,7 @@ class Graph(object):
         self.within_cluster_distance = 0.
         self.between_cluster_distance = sum(map(lambda x: x[2],
                                                 self.sorted_edges))
+
 
     def __sorted_edges(self, vertices_map):
         s = set()
@@ -114,14 +131,14 @@ class Graph(object):
 
         if (sv1_id, sv2_id) in merged_edges:
             for v in self.edges[sv1_id]:
-                d_diff -= self.edges[sv1_id][v][0]
+                d_diff -= self.edges[sv1_id][v].min_edge
             for v in self.edges[sv2_id]:
-                d_diff -= self.edges[sv2_id][v][0]
+                d_diff -= self.edges[sv2_id][v].min_edge
             for v in merged_edges[sv1_id, sv2_id]:
-                d_diff += merged_edges[sv1_id, sv2_id][v][0]
-            d_diff += self.edges[sv1_id][sv2_id][0]
+                d_diff += merged_edges[sv1_id, sv2_id][v].min_edge
+            d_diff += self.edges[sv1_id][sv2_id].min_edge
         else:
-            d_diff = self.edges[sv1_id][sv2_id][0]
+            d_diff = self.edges[sv1_id][sv2_id].min_edge
         loss, a, b, d = self.loss()
 
         an = a + a_diff
@@ -135,14 +152,14 @@ class Graph(object):
         if sv1_id in self.edges:
             for v in self.edges[sv1_id]:
                 if v != sv2_id:
-                    edges.connect((sv1_id, sv2_id), v, self.edges[sv1_id][v][0])
-                    edges.connect((sv1_id, sv2_id), v, self.edges[sv1_id][v][1])
+                    edges.connect((sv1_id, sv2_id), v, self.edges[sv1_id][v].min_edge)
+                    edges.connect((sv1_id, sv2_id), v, self.edges[sv1_id][v].max_edge)
 
         if sv2_id in self.edges:
             for v in self.edges[sv2_id]:
                 if v != sv1_id:
-                    edges.connect((sv1_id, sv2_id), v, self.edges[sv2_id][v][0])
-                    edges.connect((sv1_id, sv2_id), v, self.edges[sv2_id][v][1])
+                    edges.connect((sv1_id, sv2_id), v, self.edges[sv2_id][v].min_edge)
+                    edges.connect((sv1_id, sv2_id), v, self.edges[sv2_id][v].max_edge)
 
         return edges
 
@@ -178,11 +195,18 @@ class Graph(object):
         improvable = True
         iterations = 0
         while improvable and len(self.vertices) > min_elems:
+            #print "* Iteration %d" % (iterations)
+            #print "* Vertices: %d" % len(self.vertices)
+
             improvable = False
             if len(self.vertices) > 1:
                 position_to_pop = None
                 for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
                     if len(self.vertices) < 10:
+                        #print self.sv_map
+                        #print self.vertices
+                        self.edges.debug()
+                        #print self.sorted_edges
                     sv1_id = self.sv_map[v1]
                     sv2_id = self.sv_map[v2]
                     merged_edges = self.merge_edges(sv1_id, sv2_id)
@@ -192,6 +216,8 @@ class Graph(object):
 
                     new_loss, old_loss, (a, b, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
                     if new_loss < old_loss:
+                        # print "* Merging. Old loss: %.5f. New loss: %.5f; NTH element: %d" % (old_loss,  new_loss, i)
+                        # print a, b, d
                         self.within_cluster_distance = a
                         self.singular_vertices_no = b / self.max_edge
                         self.between_cluster_distance = d
@@ -208,10 +234,8 @@ class Graph(object):
                         if (sv1_id, sv2_id) in merged_edges:
                             self.edges.merge(merged_edges, (sv1_id, sv2_id), new_id)
                             for v in merged_edges[sv1_id, sv2_id]:
-                                self.edges.connect(v, new_id,
-                                        merged_edges[sv1_id, sv2_id][v][0])
-                                self.edges.connect(v, new_id,
-                                        merged_edges[sv1_id, sv2_id][v][1])
+                                self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v].min_edge)
+                                self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v].max_edge)
                         
                         for v in self.edges[sv1_id]:
                             self.edges.drop(v, sv1_id)
@@ -228,8 +252,14 @@ class Graph(object):
                         iterations += 1
                         position_to_pop = i
                         break
+                    # else:
+                        # print "* WRONG. Old loss: %.5f. New loss: %.5f; NTH element: %d" % (old_loss,  new_loss, i)
+                        # print a, b, d
                 if position_to_pop is not None:
+                    #self.sorted_edges.pop(position_to_pop)
                     self.sorted_edges = self.sorted_edges[position_to_pop+1:]
+                    #self.sorted_edges = self.sorted_edges[position_to_pop+1:] + self.sorted_edges[:position_to_pop]
+        print len(self.vertices)
         for v in self.vertices:
             if len(self.vertices[v].map) < min_elems:
                 self.vertices[v] = self.vertices[v].build_flat()
@@ -239,6 +269,7 @@ class Graph(object):
 
 class FlatGraph(Graph):
     def reduce(self, min_elems=50):
+        #print "* Flat graph reduce is no-op."
         pass
 
 class SuperVertex(object):
