@@ -18,51 +18,44 @@ def load_data(data_set_glob):
 def vertices_map_from(data):
     vertices_map = {}
     for key in data:
+        del(key['tags'])
+        new_similars = {}
+        for edge in key['similars']:
+            new_similars[edge[0]] = edge[1]
         vertices_map[key['track_id']] = key
+        vertices_map[key['track_id']]['similars'] = new_similars
     return vertices_map
 
-def fix_similarity_symmetricity(vertices_map):
-    fixed_records = 0
-    unequal_records = 0    
-    for v1key in vertices_map:
-        v1 = vertices_map[v1key]
-        for v1index, v1similar in enumerate(v1['similars']):
-            v2key, v1v2similar = v1similar
-            if v2key not in vertices_map:
+def fix_similarity_symmetry(vertices_map):
+    one_direction_edges = 0
+    nonsymmetrical_edges = 0
+    for v1_id in vertices_map:
+        for v2_id in vertices_map[v1_id]['similars']:
+            if v2_id not in vertices_map:
                 continue
-
-            v2 = vertices_map[v2key]
-
-            is_symmetric = False
-            for v2index, v2similar in enumerate(v2['similars']):
-                vskey, v2v1similar = v2similar
-                if vskey != v1key:
-                    continue
-                else:
-                    is_symmetric = True
-                    vertices_map[v1key]['similars'][v1index] = [v2key, max(v1v2similar, v2v1similar)]
-                    vertices_map[v2key]['similars'][v2index] = [v1key, max(v1v2similar, v2v1similar)]
-                    if math.fabs(v1v2similar - v2v1similar) >= 0.0001:
-                        unequal_records += 1
-
-            if not is_symmetric:
-                vertices_map[v2key]['similars'].append([v1key, v1v2similar])
-                fixed_records += 1
-
-    return fixed_records, unequal_records
+            v1_to_v2_cost = vertices_map[v1_id]['similars'][v2_id]
+            if v1_id not in vertices_map[v2_id]['similars']:
+                one_direction_edges += 1
+                vertices_map[v2_id]['similars'][v1_id] = v1_to_v2_cost
+            v2_to_v1_cost = vertices_map[v2_id]['similars'][v1_id]
+            if math.fabs(v1_to_v2_cost - v2_to_v1_cost) >= 1e-4:
+                nonsymmetrical_edges += 1
+                best_cost = max(v1_to_v2_cost, v2_to_v1_cost)
+                vertices_map[v1_id]['similars'][v2_id] = best_cost
+                vertices_map[v2_id]['similars'][v1_id] = best_cost
+    return one_direction_edges, nonsymmetrical_edges
 
 def purge_invalid_vertices(vertices_map):
-    to_delete = []
-    vertices_to_delete = []
-    for key in vertices_map:
+    deleted = 0
+    for key in vertices_map.keys():
         similars = vertices_map[key]['similars']
-        is_internal = lambda x: x[0] in vertices_map 
-        vertices_map[key]['similars'] = filter(is_internal, similars)
+        vs = vertices_map[key]['similars'].keys()
+        for v in vs:
+            if v not in vertices_map:
+                del(vertices_map[key]['similars'][v])
         if len(vertices_map[key]['similars']) == 0:
-            vertices_to_delete.append(key)
+            deleted += 1
+            del(vertices_map[key])
 
-    for v in vertices_to_delete:
-        del vertices_map[v]
-
-    return vertices_map, len(vertices_to_delete)
+    return vertices_map, deleted
 

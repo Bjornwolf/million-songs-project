@@ -3,7 +3,7 @@ from collections import Counter
 
 def similars_hist(vertices_map):
     counts = []
-    for v in train_vertices_map:
+    for v in vertices_map:
         counts.append(len(vertices_map[v]['similars']))
     plt.hist(counts, bins=40)
     plt.show()

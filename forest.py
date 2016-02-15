@@ -21,8 +21,8 @@ class Forest(object):
                 used.add(pv)
                 connected_component_keys.append(pv)
                 for nv in self.vertices_map[pv]['similars']:
-                    if nv[0] not in used:
-                        bfs_q.append(nv[0])
+                    if nv not in used:
+                        bfs_q.append(nv)
             
             graph_type = FlatGraph
             if len(connected_component_keys) > self.min_graph_elems:

@@ -283,9 +283,9 @@ class SuperVertex(object):
 
     def add(self, vertex):
         self.map[vertex['track_id']] = vertex
-        for v, w in vertex['similars']:
+        for v in vertex['similars']:
             if v in self.map:
-                self.max_edge = max(self.max_edge, w)
+                self.max_edge = max(self.max_edge, vertex['similars'][v])
 
     def count(self):
         return len(self.map.keys())
