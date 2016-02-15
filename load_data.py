@@ -10,6 +10,7 @@ def load_data(data_set_glob):
     for track_file in train_files:
         handler = open(track_file, 'r')
         track = json.load(handler) 
+        del(track['tags'])
         train_data.append(track)
         handler.close()
 
@@ -17,13 +18,13 @@ def load_data(data_set_glob):
 
 def vertices_map_from(data):
     vertices_map = {}
-    for key in data:
-        del(key['tags'])
+    for track in data:
+        # del(key['tags'])
         new_similars = {}
-        for edge in key['similars']:
+        for edge in track['similars']:
             new_similars[edge[0]] = edge[1]
-        vertices_map[key['track_id']] = key
-        vertices_map[key['track_id']]['similars'] = new_similars
+        vertices_map[track['track_id']] = track
+        vertices_map[track['track_id']]['similars'] = new_similars
     return vertices_map
 
 def fix_similarity_symmetry(vertices_map):

@@ -11,10 +11,8 @@ config_dict = yaml.load(open(sys.argv[1], 'r'))
 print config_dict
 data_location = config_dict['data_location']
 
-data = load_data(data_location)
-
-print "* Data loaded (%d entries)" % (len(data))
-vertices_map = vertices_map_from(data)
+# print "* Data loaded (%d entries)" % (len(data))
+vertices_map = vertices_map_from(load_data(data_location))
 broken, unequal = fix_similarity_symmetry(vertices_map)
 print "* Fixed similarity relation symmetry (%d unidirected, %d unequal)" % (broken, unequal)
 
