@@ -3,7 +3,7 @@ import sys
 
 from load_data import load_data, vertices_map_from, purge_invalid_vertices, fix_similarity_symmetricity
 
-from analysis_stats import text_hist_clusters
+from analysis_stats import text_hist_clusters, similars_hist
 
 from forest import Forest
 
@@ -21,6 +21,8 @@ print "* Fixed similarity relation symmetricity (%d unidirected, %d unequal)" % 
 print "* Vertices map generated"
 _, deleted = purge_invalid_vertices(vertices_map)
 print "* Cleaned up vertices map (deleted %d isolated vertices)" % (deleted)
+
+similars_hist(vertices_map)
 
 forest = Forest(vertices_map)
 forest.build()
