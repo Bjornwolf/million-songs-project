@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from collections import Counter
 
 def similars_hist(vertices_map):
     counts = []
@@ -8,5 +9,5 @@ def similars_hist(vertices_map):
     plt.show()
 
 def text_hist_clusters(graph):
-    return Counter([len(g.vertices[x].vertices) for x in g.vertices])
+    return Counter([len(graph.vertices[x].vertices) for x in graph.vertices])
 
