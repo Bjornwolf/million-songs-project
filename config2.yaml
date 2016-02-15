@@ -1,2 +1,0 @@
-train_data_location: lastfm_train/**/**/**/*.json
-test_data_location: ''

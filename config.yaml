@@ -1,3 +1,0 @@
-train_data_location: lastfm_train/**/**/**/*.json
-test_data_location: ''
-similarity_threshold: 0.00 

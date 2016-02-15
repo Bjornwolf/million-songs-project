@@ -8,12 +8,9 @@ from collections import Counter
 
 config_dict = yaml.load(open(sys.argv[1], 'r'))
 print config_dict
-train_path = config_dict['train_data_location']
-test_path = config_dict['test_data_location']
-similarity_threshold = config_dict['similarity_threshold']
+data_location = config_dict['data_location']
 
-train_data, train_tags, test_data, test_tags = load_data(train_path, test_path,
-        similarity_threshold)
+train_data = load_data(train_path)
 
 print "* Data loaded (%d entries)" % (len(train_data))
 train_vertices_map = {}
