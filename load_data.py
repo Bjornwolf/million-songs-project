@@ -16,7 +16,7 @@ def load_data(data_set_glob):
 
     return train_data
 
-def vertices_map_from(data):
+def vertices_map_from(data, delete_data=False):
     vertices_map = {}
     for track in data:
         # del(key['tags'])
@@ -25,6 +25,8 @@ def vertices_map_from(data):
             new_similars[edge[0]] = edge[1]
         vertices_map[track['track_id']] = track
         vertices_map[track['track_id']]['similars'] = new_similars
+    if delete_data:
+        del(data)
     return vertices_map
 
 def fix_similarity_symmetry(vertices_map):
