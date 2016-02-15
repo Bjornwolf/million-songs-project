@@ -2,10 +2,8 @@ import glob
 import json
 import sys
 
-def load_data(train_set_dir):
-    train_files = glob.glob(train_set_dir)
-    test_files = glob.glob(test_set_dir)
-
+def load_data(data_set_glob):
+    train_files = glob.glob(data_set_glob)
     train_data = []
 
     for track_file in train_files:
