@@ -3,6 +3,7 @@ import json
 import sys
 import math
 
+
 def load_data(data_set_glob):
     train_files = glob.glob(data_set_glob)
     train_data = []
@@ -11,10 +12,11 @@ def load_data(data_set_glob):
 
     for track_file in train_files:
         handler = open(track_file, 'r')
-        track = json.load(handler) 
+        track = json.load(handler)
         if track["track_id"] in uniq_map:
             track["track_id"] = uniq_map[track["track_id"]]
         else:
+            uniq_map[track["track_id"]] = uniq_number
             track["track_id"] = uniq_number
             uniq_number += 1
 
@@ -23,6 +25,7 @@ def load_data(data_set_glob):
             if tid in uniq_map:
                 track["similars"][index][0] = uniq_map[tid]
             else:
+                uniq_map[tid] = uniq_number
                 track["similars"][index][0] = uniq_number
                 uniq_number += 1
 
@@ -31,6 +34,7 @@ def load_data(data_set_glob):
         handler.close()
 
     return train_data
+
 
 def vertices_map_from(data, delete_data=False):
     vertices_map = {}
