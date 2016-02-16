@@ -6,10 +6,26 @@ import math
 def load_data(data_set_glob):
     train_files = glob.glob(data_set_glob)
     train_data = []
+    uniq_number = 0
+    uniq_map = {}
 
     for track_file in train_files:
         handler = open(track_file, 'r')
         track = json.load(handler) 
+        if track["track_id"] in uniq_map:
+            track["track_id"] = uniq_map[track["track_id"]]
+        else:
+            track["track_id"] = uniq_number
+            uniq_number += 1
+
+        for index, similar in enumerate(track["similars"]):
+            tid, _ = similar
+            if tid in uniq_map:
+                track["similars"][index][0] = uniq_map[tid]
+            else:
+                track["similars"][index][0] = uniq_number
+                uniq_number += 1
+
         del(track['tags'])
         train_data.append(track)
         handler.close()
