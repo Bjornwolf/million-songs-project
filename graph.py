@@ -253,13 +253,8 @@ class Graph(object):
                         iterations += 1
                         position_to_pop = i
                         break
-                    # else:
-                        # print "* WRONG. Old loss: %.5f. New loss: %.5f; NTH element: %d" % (old_loss,  new_loss, i)
-                        # print a, b, d
                 if position_to_pop is not None:
-                    #self.sorted_edges.pop(position_to_pop)
                     self.sorted_edges = self.sorted_edges[position_to_pop+1:]
-                    #self.sorted_edges = self.sorted_edges[position_to_pop+1:] + self.sorted_edges[:position_to_pop]
         print len(self.vertices)
         for v in self.vertices:
             if len(self.vertices[v].map) < min_elems:
@@ -270,7 +265,6 @@ class Graph(object):
 
 class FlatGraph(Graph):
     def reduce(self, min_elems=50):
-        #print "* Flat graph reduce is no-op."
         pass
 
 class SuperVertex(object):
