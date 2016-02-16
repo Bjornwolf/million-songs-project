@@ -48,10 +48,6 @@ class EdgeMap(object):
     def values(self):
         return self.edges.values()
 
-    def debug(self):
-        #print self.edges
-        pass
-
 class Graph(object):
     def __init__(self, vertices_map):
         self.vertices = {}
@@ -196,18 +192,12 @@ class Graph(object):
         improvable = True
         iterations = 0
         while improvable and len(self.vertices) > min_elems:
-            #print "* Iteration %d" % (iterations)
-            #print "* Vertices: %d" % len(self.vertices)
-
             improvable = False
             if len(self.vertices) > 1:
                 position_to_pop = None
                 for (i, (v1, v2, _)) in enumerate(self.sorted_edges):
                     if len(self.vertices) < 10:
-                        #print self.sv_map
-                        #print self.vertices
                         self.edges.debug()
-                        #print self.sorted_edges
                     sv1_id = self.sv_map[v1]
                     sv2_id = self.sv_map[v2]
                     merged_edges = self.merge_edges(sv1_id, sv2_id)
@@ -217,8 +207,6 @@ class Graph(object):
 
                     new_loss, old_loss, (a, b, d) = self.loss_change(sv1_id, sv2_id, merged_edges)
                     if new_loss < old_loss:
-                        # print "* Merging. Old loss: %.5f. New loss: %.5f; NTH element: %d" % (old_loss,  new_loss, i)
-                        # print a, b, d
                         self.within_cluster_distance = a
                         self.singular_vertices_no = b / self.max_edge
                         self.between_cluster_distance = d
