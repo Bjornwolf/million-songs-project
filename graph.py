@@ -90,11 +90,12 @@ class Graph(object):
             for similar in vertices_map[key]['similars']:
                 track = vertices_map[key]
                 first_v = track['track_id']
-                second_v = similar[0]
+                second_v = similar
+                similarity = vertices_map[key]['similars'][second_v]
                 if first_v in self.sv_map and second_v in self.sv_map:
                     s.add((min(first_v, second_v),
                            max(first_v, second_v),
-                           1 / similar[1]))
+                           1 / similarity))
 
         return sorted(s, key=lambda x: x[2])
 
@@ -236,7 +237,7 @@ class Graph(object):
                             for v in merged_edges[sv1_id, sv2_id]:
                                 self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v].min_edge)
                                 self.edges.connect(v, new_id, merged_edges[sv1_id, sv2_id][v].max_edge)
-                        
+
                         for v in self.edges[sv1_id]:
                             self.edges.drop(v, sv1_id)
                         for v in self.edges[sv2_id]:
@@ -247,7 +248,7 @@ class Graph(object):
 
                         del(self.vertices[sv1_id])
                         del(self.vertices[sv2_id])
-                        
+
                         improvable = True
                         iterations += 1
                         position_to_pop = i

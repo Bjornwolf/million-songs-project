@@ -1,6 +1,5 @@
 import glob
 import json
-import sys
 import math
 
 
@@ -49,6 +48,7 @@ def vertices_map_from(data, delete_data=False):
         del(data)
     return vertices_map
 
+
 def fix_similarity_symmetry(vertices_map):
     one_direction_edges = 0
     nonsymmetrical_edges = 0
@@ -68,10 +68,10 @@ def fix_similarity_symmetry(vertices_map):
                 vertices_map[v2_id]['similars'][v1_id] = best_cost
     return one_direction_edges, nonsymmetrical_edges
 
+
 def purge_invalid_vertices(vertices_map):
     deleted = 0
     for key in vertices_map.keys():
-        similars = vertices_map[key]['similars']
         vs = vertices_map[key]['similars'].keys()
         for v in vs:
             if v not in vertices_map:
@@ -81,4 +81,3 @@ def purge_invalid_vertices(vertices_map):
             del(vertices_map[key])
 
     return vertices_map, deleted
-
