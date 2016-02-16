@@ -1,20 +1,18 @@
 import yaml
 import sys
-
-from load_data import load_data, vertices_map_from, purge_invalid_vertices, fix_similarity_symmetry
-
+from load_data import load_data, purge_invalid_vertices, fix_similarity_symmetry
 from analysis_stats import text_hist_clusters, similars_hist
-
 from forest import Forest
+
 
 @profile
 def run():
     config_dict = yaml.load(open(sys.argv[1], 'r'))
     print config_dict
     data_location = config_dict['data_location']
-    data = load_data(data_location)
+    vertices_map = load_data(data_location)
     # print "* Data loaded (%d entries)" % (len(data))
-    vertices_map = vertices_map_from(data)
+    # vertices_map = vertices_map_from(data)
     broken, unequal = fix_similarity_symmetry(vertices_map)
     print "* Fixed similarity relation symmetry (%d unidirected, %d unequal)" % (broken, unequal)
 

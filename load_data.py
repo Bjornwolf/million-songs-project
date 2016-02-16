@@ -1,13 +1,14 @@
 import glob
 import json
 import math
+import gc
 
 
 def load_data(data_set_glob):
     train_files = glob.glob(data_set_glob)
-    train_data = []
     uniq_number = 0
     uniq_map = {}
+    vertices_map = {}
 
     for track_file in train_files:
         handler = open(track_file, 'r')
@@ -29,23 +30,16 @@ def load_data(data_set_glob):
                 uniq_number += 1
 
         del(track['tags'])
-        train_data.append(track)
-        handler.close()
-
-    return train_data
-
-
-def vertices_map_from(data, delete_data=False):
-    vertices_map = {}
-    for track in data:
-        # del(key['tags'])
         new_similars = {}
         for edge in track['similars']:
             new_similars[edge[0]] = edge[1]
-        vertices_map[track['track_id']] = track
-        vertices_map[track['track_id']]['similars'] = new_similars
-    if delete_data:
-        del(data)
+        new_track = {}
+        for key in track:
+            new_track[key] = track[key]
+        new_track['similars'] = new_similars
+        del(track)
+        vertices_map[new_track['track_id']] = new_track
+        handler.close()
     return vertices_map
 
 

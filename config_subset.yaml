@@ -1,2 +1,2 @@
 data_location: lastfm_subset/**/**/**/*.json
-min_elems: 100
+min_elems: 10

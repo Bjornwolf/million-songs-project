@@ -4,6 +4,6 @@ GiBs just for data)
 * Create code for determining distinct sets on a graph (making it a forest)
 * Reduce each graph from forest
 * Perform FW algorithm to create distance matrix
-* Perform MDS to fill gaps in a distance matrix
+* Perform MDS to convert the distance matrix to real coordinates
 * Present results
 * Make a simple content-based recommendation system
