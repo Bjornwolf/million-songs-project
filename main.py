@@ -26,7 +26,10 @@ def run():
         forest = Forest(vertices_map, min_graph_elems=config_dict['min_elems'])
     else:
         forest = Forest(vertices_map)
-    forest.build()
+    ccs = forest.build_connected_components()
+    print "* Built connected components"
+    forest.build_forest(ccs)
+    print "* Built graphs out of connected components"
     forest.reduce()
 
     print len(forest.elements)

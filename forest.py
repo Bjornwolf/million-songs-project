@@ -6,7 +6,7 @@ class Forest(object):
         self.vertices_map = vertices_map
         self.min_graph_elems = min_graph_elems
 
-    def build(self):
+    def build_connected_components(self):
         used = set()
         result = []
 
@@ -23,16 +23,18 @@ class Forest(object):
                 for nv in self.vertices_map[pv]['similars']:
                     if nv not in used:
                         bfs_q.append(nv)
-            
-            graph_type = FlatGraph
-            if len(connected_component_keys) > self.min_graph_elems:
-                graph_type = Graph
-
-            result.append(
-                graph_type({ k: self.vertices_map[k] for k in connected_component_keys })
-            )
         
-        self.elements = result
+            result.append(connected_component_keys)            
+        return result
+
+    def build_forest(self, connected_components):
+        self.elements = []
+        for connected_component in connected_components:
+            graph_type = Graph
+            if len(connected_component) < self.min_graph_elems:
+                graph_type = FlatGraph
+            self.elements.append(graph_type({ k: self.vertices_map[k] for k in
+                connected_component }))
 
     def elements_count(self):
         return len(self.elements)
