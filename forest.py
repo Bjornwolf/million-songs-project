@@ -9,6 +9,7 @@ class Forest(object):
 
     def build_connected_components(self):
         used = [False] * (max(self.vertices_map.keys()) + 1)
+        print "dzierzak"
         result = []
 
         for v in self.vertices_map:
@@ -22,12 +23,12 @@ class Forest(object):
                 used[pv] = True
                 connected_component_keys.append(pv)
                 for nv in self.vertices_map[pv]['similars']:
-                    if nv >= len(used):
-                        print nv, len(used)
                     if not used[nv]:
+                        used[nv] = True
                         bfs_q.append(nv)
-
+            print "nastepna skladowa"
             result.append(connected_component_keys)
+            print len(result)
         return result
 
     def build_forest(self, connected_components):

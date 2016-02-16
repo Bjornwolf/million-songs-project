@@ -5,7 +5,7 @@ from analysis_stats import text_hist_clusters, similars_hist
 from forest import Forest
 
 
-@profile
+# @profile
 def run():
     config_dict = yaml.load(open(sys.argv[1], 'r'))
     print config_dict
@@ -20,7 +20,8 @@ def run():
     _, deleted = purge_invalid_vertices(vertices_map)
     print "* Cleaned up vertices map (deleted %d isolated vertices)" % (deleted)
 
-    similars_hist(vertices_map)
+    
+#similars_hist(vertices_map)
 
     if 'min_elems' in config_dict:
         forest = Forest(vertices_map, min_graph_elems=config_dict['min_elems'])

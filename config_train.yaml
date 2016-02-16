@@ -1,1 +1,2 @@
 data_location: lastfm_train/**/**/**/*.json
+min_elems: 10
