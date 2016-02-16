@@ -31,6 +31,7 @@ def run():
     forest.build_forest(ccs)
     print "* Built graphs out of connected components"
     forest.reduce()
+    print "* Forest reduced!"
 
     print len(forest.elements)
     print forest.elements_size_hist()
