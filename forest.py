@@ -1,5 +1,6 @@
 from graph import NewGraph
 from collections import deque, Counter
+import cPickle as pickle
 
 
 class Forest(object):
@@ -9,7 +10,6 @@ class Forest(object):
 
     def build_connected_components(self):
         used = [False] * (max(self.vertices_map.keys()) + 1)
-        print "dzierzak"
         result = []
 
         for v in self.vertices_map:
@@ -26,9 +26,7 @@ class Forest(object):
                     if not used[nv]:
                         used[nv] = True
                         bfs_q.append(nv)
-            print "nastepna skladowa"
             result.append(connected_component_keys)
-            print len(result)
         return result
 
     def build_forest(self, connected_components):
@@ -41,8 +39,18 @@ class Forest(object):
         return len(self.elements)
 
     def elements_size_hist(self):
-        return Counter(map(lambda x: len(x.vertices), self.elements))
+        return Counter(map(lambda x: len(x.subgraphs), self.elements))
 
     def reduce(self):
+        it = 1
         for graph in self.elements:
+            print it, "/", len(self.elements)
             graph.reduce(min_elems=self.min_graph_elems)
+            it += 1
+
+    def pickle(self, path):
+        toplevel = map(lambda x: x.id, self.elements)
+        with open(path + 'toplevel.p', 'wb') as f:
+            pickle.dump(toplevel, f)
+        for elem in self.elements:
+            elem.pickle_graph(path)

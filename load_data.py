@@ -2,9 +2,9 @@ import glob
 import json
 import math
 import gc
+import pickle
 
-
-def load_data(data_set_glob):
+def load_data(data_set_glob, uniq_map_file, runiq_map_file):
     train_files = glob.glob(data_set_glob)
     uniq_number = 0
     uniq_map = {}
@@ -28,6 +28,7 @@ def load_data(data_set_glob):
                 uniq_map[tid] = uniq_number
                 track["similars"][index][0] = uniq_number
                 uniq_number += 1
+            track["similars"][index][1] = 1.0 / track["similars"][index][1]
 
         del(track['tags'])
         new_similars = {}
@@ -39,9 +40,15 @@ def load_data(data_set_glob):
         new_track['similars'] = new_similars
         del(track)
         vertices_map[new_track['track_id']] = new_track
-        handler.close()
-    return vertices_map
+        handler.close() 
 
+    with open(uniq_map_file, "wb") as f:
+        pickle.dump(uniq_map, f)
+
+    with open(runiq_map_file, "wb") as f:
+        pickle.dump({ v: k for k, v in uniq_map.items() }, f)
+
+    return vertices_map
 
 def fix_similarity_symmetry(vertices_map):
     one_direction_edges = 0
