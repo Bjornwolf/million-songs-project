@@ -12,41 +12,45 @@ class SmartEdge(object):
     def __repr__(self):
         return "(%.2f, %.2f)" % (self.min_edge, self.max_edge)
 
+#class EdgeMap(object):
+#    def __init__(self):
+#        self.edges = {}
+#
+#    def merge(self, edge_map, source_key, new_key):
+#        for v in edge_map[source_key]:
+#            self.connect(new_key, v, edge_map[source_key][v].min_edge)
+#            self.connect(new_key, v, edge_map[source_key][v].max_edge)
+#
+#    def connect(self, v1, v2, weight):
+#        if v1 not in self.edges:
+#            self.edges[v1] = {}
+#
+#        if v2 not in self.edges[v1]:
+#            self.edges[v1][v2] = SmartEdge()
+
+#        self.edges[v1][v2].add(weight)
+
+#    def min_edges_list(self):
+#        return [(v1, v2, self.edges[v1][v2].min_edge) for v1 in self.edges for v2 in self.edges[v1]]
+
+#    def drop_vertex(self, v):
+#        del self.edges[v]
+
+#    def drop(self, v1, v2):
+#        del self.edges[v1][v2]
+
+#    def __getitem__(self, pos_arg):
+#        return self.edges.__getitem__(pos_arg)
+
+#    def __iter__(self):
+#        return self.edges.__iter__()
+
+#    def values(self):
+#        return self.edges.values()
+
 class EdgeMap(object):
     def __init__(self):
-        self.edges = {}
-
-    def merge(self, edge_map, source_key, new_key):
-        for v in edge_map[source_key]:
-            self.connect(new_key, v, edge_map[source_key][v].min_edge)
-            self.connect(new_key, v, edge_map[source_key][v].max_edge)
-
-    def connect(self, v1, v2, weight):
-        if v1 not in self.edges:
-            self.edges[v1] = {}
-
-        if v2 not in self.edges[v1]:
-            self.edges[v1][v2] = SmartEdge()
-
-        self.edges[v1][v2].add(weight)
-
-    def min_edges_list(self):
-        return [(v1, v2, self.edges[v1][v2].min_edge) for v1 in self.edges for v2 in self.edges[v1]]
-
-    def drop_vertex(self, v):
-        del self.edges[v]
-
-    def drop(self, v1, v2):
-        del self.edges[v1][v2]
-
-    def __getitem__(self, pos_arg):
-        return self.edges.__getitem__(pos_arg)
-
-    def __iter__(self):
-        return self.edges.__iter__()
-
-    def values(self):
-        return self.edges.values()
+        self.edges = SortedDict
 
 class Graph(object):
     def __init__(self, vertices_map):
@@ -278,3 +282,231 @@ class SuperVertex(object):
 
     def build_flat(self):
         return FlatGraph(self.map)
+
+from Banyan import SortedSet
+
+class SingleVertexGraph(object):
+    def __init__(self, vertex_id):
+        self.id = vertex_id
+        self.is_single = True
+        self.edges = {}
+        self.subgraphs = {}
+        self.subgraphs_order = SortedSet(key=lambda x: x.count())
+
+    def loss(self):
+        pass
+
+    def loss_change(self, vertex_id, neighbour_id):
+        pass
+
+    def reduce(self, min_elems=100):
+        pass
+
+    def count(self):
+        return 1
+
+class NewGraph(object):
+    ID = 0
+
+    def __init__(self, vertices_map):
+        self.is_single = False
+        self.wrap_with_subgraphs(vertices_map)
+        self.establish_subgraphs_order()
+        self.build_loss_parameters()
+
+        self.id = NewGraph.ID
+        NewGraph.ID += 1
+    
+    def count(self):
+        return len(self.subgraphs)
+
+    def establish_subgraphs_order(self):
+        self.subgraphs_order = SortedSet(self.subgraphs.keys(), 
+                                         key=lambda x: x.count())
+
+    def wrap_with_subgraphs(self, vertices_map):
+        self.subgraphs = {}
+        self.known_ids = set(vertices_map.keys())
+        self.edges = {}
+        for vertex_id in vertices_map:
+            self.edges[vertex_id] = {}
+            for key in vertices_map[vertex_id]['similars']:
+                weight = vertices_map[vertex_id]['similars'][key]
+                self.edges[vertex_id][key] = [(vertex_id, key, weight)]
+            del(vertices_map[vertex_id]['similars'])
+            new_subgraph = SingleVertexGraph(vertex_id)
+            self.subgraphs[new_subgraph.id] = new_subgraph
+
+    def build_loss_parameters(self):
+        self.within_cluster_distance = 0.
+        self.singular_vertices_no = len(self.subgraphs)
+        self.between_cluster_distance = 0.
+        self.max_weight = 0.
+        for from_v in self.edges:
+            for to_w in self.edges[from_v]:
+                edge_list = self.edges[from_v][to_w]
+                edge_weights = map(lambda x: x[2], edge_list)
+                self.max_weight = max(max(edge_weights), self.max_weight)
+                self.between_cluster_distance +=sum(edge_weights)
+        self.between_cluster_distance /= 2.
+
+    def loss(self):
+        wcd = self.within_cluster_distance
+        svp = self.max_weight * self.singular_vertices_no
+        bcd = self.between_cluster_distance
+        # pomysl loss * self.vertices[self.vertices_order[-1]].count()
+        return (wcd + svp) * bcd
+
+    def reduce(self, min_elems=100):
+        improvable = True
+        while improvable and self.count() > min_elems:
+            improvable = False
+            improvement_point = None
+            loss = self.loss()
+
+            for subgraph_id in self.subgraphs_order:
+                subgraph = self.subgraphs[subgraph_id]
+                for neighbour_id in self.edges[subgraph_id]: 
+                    new_loss = self.loss_after_merge(subgraph_id, neighbour_id)
+
+                    if new_loss < loss:
+                        new_subgraph_id = self.merge_subgraphs(subgraph_id, neighbour_id)
+                        improvement_point = (subgraph_id, neighbour_id, new_sv_id)
+                        break
+                if improvement_point:
+                    improvable = True
+                    break
+            self.cleanup_subgraphs(improvement_point)
+        print "Reducing subgraphs..."
+        for subgraph_id in self.subgraphs:
+            self.subgraphs[subgraph_id].reduce(min_elems=min_elems)
+        print "Reduction complete!"
+
+    def loss_after_merge(self, subgraph_id, neighbour_id):
+        weight = self.edges[subgraph_id][neighbour_id][-1][2]
+        max_e = lambda v: self.subgraphs[v].max_weight
+        plus_candidate = max(max_e(subgraph_id), max_e(neighbour_id))
+        plus_candidate = max(plus_candidate, weight)
+        delta_wcd = plus_candidate - max_e(subgraph_id) - max_e(neighbour_id)
+
+        delta_svp = 0
+        if self.subgraphs[subgraph_id].is_single:
+            delta_svp -= 1
+        if self.subgraphs[neighbour_id].is_single:
+            delta_svp -= 1
+
+        
+        edge_weight = lambda edges: edges[0][2]
+        min_weight_sum = lambda v: sum([edge_weight(self.edges[v][w]) for w in self.edges[v]])
+        delta_bcd = weight - min_weight_sum(subgraph_id) - min_weight_sum(neighbour_id)
+        new_edges = self.adjacent_edges(subgraph_id, neighbour_id)
+        delta_bcd += sum(new_edges.values())
+
+        new_wcd = self.within_cluster_distance + delta_wcd
+        new_svp = (self.singular_vertices_no + delta_svp) * self.max_weight
+        new_bcd = self.between_cluster_distance + delta_bcd
+        return (new_wcd + new_svp) * new_bcd
+
+    def adjacent_edges(self, subgraph_id, neighbour_id):
+        adjacent_edges = {k: self.edges[subgraph_id][0][2] for k in
+                self.edges[subgraph_id]}
+        neighbour_similars = self.edges[neighbour_id]
+        for neighbour_adjacent in neighbour_similars:
+            current_edge_weight = neighbour_similars[neighbour_adjacent][0][2]
+            if neighbour_adjacent in adjacent_edges:
+                existing_edge_weight = adjacent_edges[neighbour_adjacent]
+                adjacent_edges[neighbour_adjacent] = min(existing_edge_weight, 
+                                                         current_edge_weight)
+            else:
+                adjacent_edges[neighbour_adjacent] = current_edge_weight 
+        return adjacent_edges
+
+    def extract_edges(self, subgraph_id, neighbour_id):
+        edges_between = self.edges[subgraph_id][neighbour_id]
+        edges_between_dict = {}
+        for (u, v, w) in edges_between:
+            if u not in edges_between_dict:
+                edges_between_dict[u] = {}
+            if v not in edges_between_dict[u]:
+                edges_between_dict[u][v] = []
+            edges_between_dict[u][v].append( (u, v, w) )
+        return edges_between_dict
+
+    def merge_edges(self, subgraph_id, neighbour_id):
+        edges_from_left = self.subgraphs[subgraph_id].edges
+        edges_from_right = self.subgraphs[neighbour_id].edges
+        edges_left_to_right = self.extract_edges(subgraph_id, neighbour_id)
+        edges_right_to_left = self.extract_edges(neighbour_id, subgraph_id)
+
+        new_graph_edges = edges_left_to_right
+        for v1 in edges_right_to_left:
+            if v1 not in new_graph_edges:
+                new_graph_edges[v1] = {}
+            for v2 in edges_right_to_left[v1]:
+                new_graph_edges[v1][v2] = edges_right_to_left[v1][v2]
+
+        for v1 in edges_from_left:
+            if v1 not in new_graph_edges:
+                new_graph_edges[v1] = {}
+            for v2 in edges_from_left[v1]:
+                if v2 not in new_graph_edges[v1]:
+                    new_graph_edges[v1][v2] = []
+                new_graph_edges[v1][v2] += edges_from_left[v1][v2]
+
+        for v1 in edges_from_right:
+            if v1 not in new_graph_edges:
+                new_graph_edges[v1] = {}
+            for v2 in edges_from_right[v1]:
+                if v2 not in new_graph_edges[v1]:
+                    new_graph_edges[v1][v2] = []
+                new_graph_edges[v1][v2] += edges_from_right[v1][v2]
+
+        new_subgraphs = self.subgraphs[subgraph_id].subgraphs
+        for right_subgraph_id in self.subgraphs[neighbour_id].subgraphs:
+            new_subgraphs[right_subgraph_id] = self.subgraphs[neighbour_id].subgraphs[right_subgraph_id]
+
+        new_subgraphs_order = self.subgraphs[subgraph_id].subgraphs_order |
+        self.subgraphs[neighbour_id].subgraphs_order
+
+        new_graph = NewGraph(subgraphs=new_subgraphs,
+                          subgraphs_order=new_subgraphs_order, 
+                          edges=new_graph_edges)
+
+        del(self.edges[subgraph_id][neighbour_id])
+        del(self.edges[neighbour_id][subgraph_id])
+        self.edges[new_graph.id] = {}
+        for v2 in self.edges[subgraph_id]:
+            self.edges[new_graph.id][v2] = self.edges[subgraph_id][v2]
+            self.edges[v2][new_graph.id] = self.edges[v2][subgraph_id]
+        for v2 in self.edges[neighbour_id]:
+            if v2 not in self.edges[new_graph.id]:
+                self.edges[new_graph.id][v2] = []
+            self.edges[new_graph.id][v2] = self.merge_sorted_lists(
+                    self.edges[neighbour_id][v2],
+                    self.edges[new_graph.id][v2])
+            
+            if new_graph.id not in self.edges[v2]:
+                self.edges[v2][new_graph.id] = []
+            self.edges[v2][new_graph.id] = self.merge_sorted_lists(
+                    self.edges[v2][new_graph.id]
+                    self.edges[v2][neighbour_id])
+
+        self.subgraphs[new_graph.id] = new_graph
+        return new_graph.id
+
+    def merge_sorted_lists(self, l1, l2):
+        result = []
+        i = 0
+        j = 0
+        while i < len(l1) and j < len(l2):
+            if l1[i][2] < l2[j][2]:
+                result.append(l1[i])
+                i += 1
+            else:
+                result.append(l2[j])
+                j += 1
+        return result + l1[i:] + l2[j:]
+
+        # TODO zrobic nowy graf, wjebac wierzcholki, wjebac krawedzie
+        # TODO poprawic polaczenia miedzy reszta grafu a nowym grafem
+        
