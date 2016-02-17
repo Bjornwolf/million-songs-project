@@ -308,10 +308,15 @@ class SingleVertexGraph(object):
 class NewGraph(object):
     ID = 0
 
-    def __init__(self, vertices_map):
+    def __init__(self, vertices_map=None, edges=None, subgraphs=None, subgraphs_order=None):
+        if edges and subgraphs and subgraphs_order:
+            self.subgraphs = subgraphs
+            self.edges = edges
+            self.subgraphs_order = subgraphs_order
+        else:
+            self.wrap_with_subgraphs(vertices_map)
+            self.establish_subgraphs_order()
         self.is_single = False
-        self.wrap_with_subgraphs(vertices_map)
-        self.establish_subgraphs_order()
         self.build_loss_parameters()
 
         self.id = NewGraph.ID
@@ -326,7 +331,6 @@ class NewGraph(object):
 
     def wrap_with_subgraphs(self, vertices_map):
         self.subgraphs = {}
-        self.known_ids = set(vertices_map.keys())
         self.edges = {}
         for vertex_id in vertices_map:
             self.edges[vertex_id] = {}
@@ -376,7 +380,6 @@ class NewGraph(object):
                 if improvement_point:
                     improvable = True
                     break
-            self.cleanup_subgraphs(improvement_point)
         print "Reducing subgraphs..."
         for subgraph_id in self.subgraphs:
             self.subgraphs[subgraph_id].reduce(min_elems=min_elems)
@@ -465,12 +468,13 @@ class NewGraph(object):
         for right_subgraph_id in self.subgraphs[neighbour_id].subgraphs:
             new_subgraphs[right_subgraph_id] = self.subgraphs[neighbour_id].subgraphs[right_subgraph_id]
 
-        new_subgraphs_order = self.subgraphs[subgraph_id].subgraphs_order |
-        self.subgraphs[neighbour_id].subgraphs_order
-
+        new_subgraphs_order = self.subgraphs[subgraph_id].subgraphs_order | self.subgraphs[neighbour_id].subgraphs_order
+        self.subgraphs_order.remove(subgraph_id)
+        self.subgraphs_order.remove(neighbour_id)
         new_graph = NewGraph(subgraphs=new_subgraphs,
                           subgraphs_order=new_subgraphs_order, 
                           edges=new_graph_edges)
+        self.subgraphs_order.add(new_graph)
 
         del(self.edges[subgraph_id][neighbour_id])
         del(self.edges[neighbour_id][subgraph_id])
@@ -488,10 +492,18 @@ class NewGraph(object):
             if new_graph.id not in self.edges[v2]:
                 self.edges[v2][new_graph.id] = []
             self.edges[v2][new_graph.id] = self.merge_sorted_lists(
-                    self.edges[v2][new_graph.id]
+                    self.edges[v2][new_graph.id],
                     self.edges[v2][neighbour_id])
 
         self.subgraphs[new_graph.id] = new_graph
+        for other_id in self.edges[subgraph_id]:
+            del(self.edges[other_id][subgraph_id])
+        for other_id in self.edges[neighbour_id]:
+            del(self.edges[other_id][neighbour_id])
+        del(self.edges[subgraph_id])
+        del(self.edges[neighbour_id])
+        del(self.subgraphs[subgraph_id])
+        del(self.subgraphs[neighbour_id])
         return new_graph.id
 
     def merge_sorted_lists(self, l1, l2):

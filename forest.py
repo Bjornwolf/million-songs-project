@@ -1,4 +1,4 @@
-from graph import Graph, FlatGraph
+from graph import NewGraph
 from collections import deque, Counter
 
 
@@ -34,10 +34,7 @@ class Forest(object):
     def build_forest(self, connected_components):
         self.elements = []
         for connected_component in connected_components:
-            graph_type = Graph
-            if len(connected_component) < self.min_graph_elems:
-                graph_type = FlatGraph
-            self.elements.append(graph_type({k: self.vertices_map[k] for k in
+            self.elements.append(NewGraph({k: self.vertices_map[k] for k in
                                  connected_component}))
 
     def elements_count(self):
