@@ -45,8 +45,6 @@ class SingleVertexGraph(object):
     def pickle_graph(self, path):
         with open(path + 'graph' + str(self.id) + '.p', 'wb') as f:
             pickle.dump( (self.distance_matrix, self.subgraphs.keys()), f)
-        for sg in self.subgraphs:
-            self.subgraphs[sg].pickle_graph(path)
 
 
 class NewGraph(object):
