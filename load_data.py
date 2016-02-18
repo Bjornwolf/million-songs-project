@@ -13,36 +13,42 @@ def load_data(data_set_glob):
     for track_file in train_files:
         handler = open(track_file, 'r')
         track = json.load(handler)
-        if track["track_id"] in uniq_map:
-            track["track_id"] = uniq_map[track["track_id"]]
-        else:
-            uniq_map[track["track_id"]] = uniq_number
-            track["track_id"] = uniq_number
-            uniq_number += 1
+        del(track["tags"])
+        del(track["artist"])
+        del(track["timestamp"])
+        del(track["title"])
 
+        uniq_map[track["track_id"]] = uniq_number
+        track["track_id"] = uniq_number
+        uniq_number += 1        
+        vertices_map[track["track_id"]] = track
+        handler.close()
+
+    for key in vertices_map:
+        to_delete = set() 
+        track = vertices_map[key]
         for index, similar in enumerate(track["similars"]):
             tid, _ = similar
             if tid in uniq_map:
                 track["similars"][index][0] = uniq_map[tid]
-            else:
-                uniq_map[tid] = uniq_number
-                track["similars"][index][0] = uniq_number
-                uniq_number += 1
-            track["similars"][index][1] = 1.0 / track["similars"][index][1]
+                track["similars"][index][1] = 1 / track["similars"][index][1]
+            else:            
+                to_delete.add(index)
+        track["similars"] = [s for k, s in enumerate(track["similars"]) if k not in to_delete]
 
-        del(track['tags'])
+    for key in vertices_map:
+        track = vertices_map[key]
         new_similars = {}
         for edge in track['similars']:
             new_similars[edge[0]] = edge[1]
         new_track = {}
         for key in track:
             new_track[key] = track[key]
-        new_track['similars'] = new_similars
         del(track)
+        new_track['similars'] = new_similars
         vertices_map[new_track['track_id']] = new_track
-        handler.close() 
 
-    return vertices_map, { v: k for k, v in uniq_map.items() }
+    return vertices_map, { v: k for k, v in uniq_map.items() }                 
 
 def fix_similarity_symmetry(vertices_map):
     one_direction_edges = 0
@@ -67,10 +73,6 @@ def fix_similarity_symmetry(vertices_map):
 def purge_invalid_vertices(vertices_map, runiq_map, uniq_map_file, runiq_map_file):
     deleted = 0
     for key in vertices_map.keys():
-        vs = vertices_map[key]['similars'].keys()
-        for v in vs:
-            if v not in vertices_map:
-                del(vertices_map[key]['similars'][v])
         if len(vertices_map[key]['similars']) == 0:
             deleted += 1
             del(vertices_map[key])

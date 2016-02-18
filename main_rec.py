@@ -4,6 +4,8 @@ import sys
 import json
 import math
 
+import matplotlib.pyplot as plt
+
 
 def prettyprint_song(config_dict, fname):
     json_loc = '/'.join([fname[2], fname[3], fname[4], fname]) + '.json'
@@ -62,21 +64,36 @@ def compare_aggregators(agg1, agg2, threshold=5.0):
     return mse_err, mde_err 
 
 def run():
+    mse_hist = []
+    mde_hist = []
+    samples = 10
     config_dict = yaml.load(open(sys.argv[1], 'r'))
     uniq = config_dict['uniq_map_file']
     runiq = config_dict['runiq_map_file']
     path = config_dict['pickle_dir']
     rec = Recommender(path, uniq, runiq)
-    ch = []
-    user = rec.generate_user()
-    ch = rec.recommend(user, n=5)
-    for fname in user:
-        prettyprint_song(config_dict, fname)
-    print user, ' --> ', ch
-    print '-->'
-    for fname in ch:
-        prettyprint_song(config_dict, fname)
-    agg1 = aggregate_tags(config_dict, user)
-    agg2 = aggregate_tags(config_dict, ch)
-    compare_aggregators(agg1, agg2)
+    for sample in range(samples):
+        ch = []
+        user = rec.generate_user()
+        ch = rec.recommend(user, n=5)
+        for fname in user:
+            prettyprint_song(config_dict, fname)
+        print user, ' --> ', ch
+        print '-->'
+        for fname in ch:
+            prettyprint_song(config_dict, fname)
+        agg1 = aggregate_tags(config_dict, user)
+        agg2 = aggregate_tags(config_dict, ch)
+        mde, mse = compare_aggregators(agg1, agg2)
+        mde_hist.append(mde)
+        mse_hist.append(mse)
+        print "***************     SAMPLE %d" % (sample)
+
+    _, (mse_plot, mde_plot) = plt.subplots(2)
+    mse_plot.set_title("Mean Squared Error / Tags Hist")
+    mde_plot.set_title("Manhattan Dist Error / Tags Hist")
+    mse_plot.hist(mse_hist)
+    mde_plot.hist(mde_hist)
+    plt.savefig(config_dict['hist_path'])
+
 run()
