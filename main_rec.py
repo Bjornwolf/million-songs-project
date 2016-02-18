@@ -12,6 +12,25 @@ def prettyprint_song(config_dict, fname):
     print json_dict['tags']
 
 
+def aggregate_tags(config_dict, names):
+    all_tags = {}
+    nonempties = 0
+    for name in names:
+        json_loc = '/'.join([name[2], name[3], name[4], name]) + '.json'
+        json_loc = config_dict['data_path'] + json_loc
+        json_dict = json.load(open(json_loc))
+        tags = json_dict['tags']
+        if len(tags) != 0:
+            nonempties += 1
+            for tag in tags:
+                if tag[0] not in all_tags:
+                    all_tags[tag[0]] = 0.
+                all_tags[tag[0]] += float(tag[1])
+    for key in all_tags:
+        all_tags[key] /= nonempties
+    return all_tags
+
+
 def run():
     config_dict = yaml.load(open(sys.argv[1], 'r'))
     uniq = config_dict['uniq_map_file']
@@ -24,8 +43,9 @@ def run():
     for fname in user:
         prettyprint_song(config_dict, fname)
     print user, ' --> ', ch
-    # prettyprint_song(config_dict, name)
     print '-->'
     for fname in ch:
         prettyprint_song(config_dict, fname)
+    print aggregate_tags(config_dict, user)
+    print aggregate_tags(config_dict, ch)
 run()
