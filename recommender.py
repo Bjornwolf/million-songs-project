@@ -1,5 +1,6 @@
 import cPickle as pickle
 import numpy as np
+import random
 
 class Recommender(object):
     def __init__(self, path, uniq, runiq):
@@ -11,6 +12,21 @@ class Recommender(object):
             self.uniq = pickle.load(f)
         with open(runiq) as f:
             self.runiq = pickle.load(f)
+
+    def generate_user(self, n=100):
+        # wybierz piosenke poczatkowa
+        song = None
+        while not song:
+            song = random.choice(self.uniq.keys())
+            _, un, _ = self.locate_ids([self.uniq[song]])
+            if len(un) != 0:
+                song = None
+        songs = [song]
+        while len(songs) < n:
+            recommended = self.recommend(songs, n=5)
+            songs += recommended
+        return songs
+        # dopoki nie nazbierasz piose
 
     def recommend(self, liked_songs, n=10):
         ids = map(lambda x: self.uniq[x], liked_songs)

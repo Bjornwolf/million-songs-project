@@ -10,7 +10,7 @@ def prettyprint_song(config_dict, fname):
     json_loc = config_dict['data_path'] + json_loc
     json_dict = json.load(open(json_loc))
     print json_dict['artist'], ' -- ', json_dict['title']
-    # print json_dict['tags']
+    print json_dict['tags']
 
 # @profile
 def run():
@@ -21,11 +21,10 @@ def run():
     
     rec = Recommender(path, uniq, runiq)
     ch = []
-    while len(ch) == 0:
-        name = random.choice(rec.uniq.keys())
-        ch = rec.recommend([name], n=5)
-    print name, ' --> ', ch
-    prettyprint_song(config_dict, name)
+    user = rec.generate_user()
+    ch = rec.recommend(user, n=5)
+    print user, ' --> ', ch
+    # prettyprint_song(config_dict, name)
     print '-->'
     for fname in ch:
         prettyprint_song(config_dict, fname)

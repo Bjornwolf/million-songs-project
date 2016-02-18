@@ -1,6 +1,6 @@
 data_location: /pio/lscratch/1/i247948/lastfm_train/**/**/**/*.json
 data_path: /pio/lscratch/1/i247948/lastfm_train/
-min_elems: 200
+min_elems: 300
 uniq_map_file: /pio/lscratch/1/i247948/pickle_train/uniq.p
 runiq_map_file: /pio/lscratch/1/i247948/pickle_train/runiq.p
 pickle_dir: /pio/lscratch/1/i247948/pickle_train/
