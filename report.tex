@@ -271,6 +271,14 @@ Po zredukowaniu grafu przechwytywanie listy krawędzi z rzeczywistych wierzchoł
 Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę identyfikatorów wierzchołków oraz macierz odległości między nimi. Procedura generowania tych plików (rekurencyjna) jest zrealizowana w obiekcie \texttt{Graph} jako \texttt{pickle\_graph}.
 
 \section{Wyniki}
+
+Przedstawione tutaj wyniki są wytworzone poprzez analizę mniejszego zbioru danych (\textit{subset}) zawierającego około 9500 utworów muzycznych.
+Niestety nie ma matematycznej miary poprawności rekomendacji. Niemniej jednak po ręcznym przeanalizowaniu otrzymanych wyników uznajemy efekty za zadowalające. System rekomenduje inne utwory tego samego artysty oraz artystów tworzących swoje albumy w podobnych czasach i stylach muzycznych.
+
+Prezentujemy kilka przykładów symulowanych przez losowanie danych wejściowych i powiązanych z nimi rekomendacji - jak również miarę podobieństwa obliczoną przez system rekomendujący:
+
+# todo wsadzaj wyniki
+
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
 
 Pomimo posiadania wiedzy na temat lokalnego podobieństwa utworów muzycznych, utworzenie miar przechodniego (tudzież "globalnego") podobieństwa pewnych utworów muzycznych okazało się wyzwaniem. System rekomendujący przedstawiony w tym projekcie jest przykładem systemu opartego na idei \textit{content-based-filtering}. Wiedza, którą generuje z informacji zadanych w zbiorze danych, jest wiedzą wynikającą wyłącznie z własności przedmiotów rekomendowanych (w tym wypadku -- utworów muzycznych). Z racji operowania pojęciem macierzy podobieństwa (która jest obiektem pamięciowo rozległym) wymagane były skomplikowane operacje grupowania danych.
