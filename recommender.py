@@ -2,6 +2,7 @@ import cPickle as pickle
 import numpy as np
 import random
 
+
 class Recommender(object):
     def __init__(self, path, uniq, runiq):
         self.known_vertices = {}
@@ -14,19 +15,28 @@ class Recommender(object):
             self.runiq = pickle.load(f)
 
     def generate_user(self, n=100):
-        # wybierz piosenke poczatkowa
+        print 'generating user'
+        songs = [self.generate_song()]
+        print 'found init song'
+        while len(songs) < n:
+            print len(songs)
+            recommended = self.recommend(songs, n=5)
+            if len(recommended) == 0:
+                song = self.generate_song()
+                if song not in recommended:
+                    recommended += [song]
+            songs += recommended
+        print 'user generated'
+        return songs
+
+    def generate_song(self):
         song = None
         while not song:
             song = random.choice(self.uniq.keys())
             _, un, _ = self.locate_ids([self.uniq[song]])
             if len(un) != 0:
                 song = None
-        songs = [song]
-        while len(songs) < n:
-            recommended = self.recommend(songs, n=5)
-            songs += recommended
-        return songs
-        # dopoki nie nazbierasz piose
+        return song
 
     def recommend(self, liked_songs, n=10):
         ids = map(lambda x: self.uniq[x], liked_songs)
@@ -44,8 +54,6 @@ class Recommender(object):
         result_keys = map(lambda x: self.runiq[x], result_keys)
         result_values = np.array(result_dist.values())
         result_values /= result_values.sum()
-        # for p in zip(result_keys, result_values):
-            # print p
 
         chosen = []
         if len(result_values) > 0:
@@ -56,7 +64,6 @@ class Recommender(object):
                 result_values[i] = 0.
                 chosen.append(result_keys[i])
         return chosen
-          
 
     def locate_ids(self, ids):
         total_neighbours = []
