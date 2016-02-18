@@ -166,7 +166,7 @@ Przy analizie danych niezbędne okazały się następujące założenia na ich t
 \begin{itemize}
  \item relacja podobieństwa danych powinna być symetryczna, więc dane zostały odpowiednio zmodyfikowane, aby założenie to spełnić,
  \item jeżeli podobieństwo utworu $A$ z $B$ wynosi $x$, podobieństwo utworu $B$ z $A$ również powinno wynosić $x$,
- \item grafy należące do lasu będące izolowanym wierzchołkiem nie niosą istotnej informacji dla systemu rekomendacyjnego -- zostały one odrzucone,
+ \item grafy należące do lasu będące izolowanym wierzchołkiem nie niosą istotnej informacji dla systemu rekomendującego -- zostały one odrzucone,
  \item jeżeli w grafie istnieje krawędź $\left(v, w\right)$ to $v$ oraz $w$ istnieje w zbiorze danych.
 \end{itemize}
 
@@ -189,7 +189,7 @@ Po przeprowadzeniu procedury poprawy symetryczności krawędzi wierzchołki i kr
 
 Sposób działania procedury podobny do działania procedury poprawy symetryczności. Przechodzimy wszystkie wierzchołki $v$ występujące w grafie. Jeżeli liczba krawędzi wychodzących z tego wierzchołka to $0$, usuwamy taki wierzchołek. W przeciwnym wypadku przeglądamy wszystkie krawędzie $\left(v, w\right)$. Jeżeli wierzchołek $w$ nie istnieje w grafie, krawędź ta zostaje usunięta.
 
-Odpowiadanie na pytanie "zawierania wierzchołka" jest zrealizowane w czasie stałym (struktura słownika). Całkowita złożoność prodedury to $\mathcal{O}\left(\left|V\right| + \left|E\right|\right)$. Wynikiem działania procedury jest zbiór danych spełniający trzecie i czwarte założenie dotyczące danych.
+Odpowiadanie na pytanie "zawierania wierzchołka" jest zrealizowane w czasie stałym (struktura słownika). Całkowita złożoność procedury to $\mathcal{O}\left(\left|V\right| + \left|E\right|\right)$. Wynikiem działania procedury jest zbiór danych spełniający trzecie i czwarte założenie dotyczące danych.
 
 Procedura jest zaimplementowana jako $\texttt{purge\_invalid\_vertices}$ w module $\texttt{load\_data}$.
 
@@ -258,18 +258,19 @@ W celu łączenia dwóch posortowanych list będących wartością dwuwymiaroweg
 
 \subsection{Obliczanie macierzy odległości}
 
-Efektem redukcji grafu jest struktura, której liczba wierzchołków na pojedyńczym poziomie jest odpowiednio zredukowana. Dzięki temu możemy policzyć macierz odległości. Macierz odległości liczona jest klasycznym algorytmem Floyda-Warshalla, działającym w czasie sześciennym od liczby wierzchołków w grafie.
+Efektem redukcji grafu jest struktura, której liczba wierzchołków na pojedynczym poziomie jest odpowiednio zredukowana. Dzięki temu możemy policzyć macierz odległości. Macierz odległości liczona jest klasycznym algorytmem Floyda-Warshalla, działającym w czasie sześciennym od liczby wierzchołków w grafie.
 
 Procedura ta jest zaimplementowana w obiekcie \texttt{Graph} jako \texttt{distance\_matrix}.
 
 \subsection{Optymalizacja pamięciowa: Usuwanie nadmiarowych krawędzi}
 
-Po zredukowaniu grafu przechywywanie listy krawędzi z rzeczywistych wierzchołków i ich wag przestaje być potrzebne. Procedura \texttt{simplify\_edges} redukuje listę do jedynego interesującego nas w przypadku macierzy odległości elementu - krotki z najmniejszą odległością.
+Po zredukowaniu grafu przechwytywanie listy krawędzi z rzeczywistych wierzchołków i ich wag przestaje być potrzebne. Procedura \texttt{simplify\_edges} redukuje listę do jedynego interesującego nas w przypadku macierzy odległości elementu - krotki z najmniejszą odległością.
 
 \subsection{Format wyjściowy}
 
-Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę identyfikatorów wierzchołków oraz macierz odległości między nimi. Prodecedura generowania tych plików (rekurencyjny) jest zrealizowany w obiekcie \texttt{Graph} jako \texttt{pickle\_graph}.
+Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę identyfikatorów wierzchołków oraz macierz odległości między nimi. Procedura generowania tych plików (rekurencyjna) jest zrealizowana w obiekcie \texttt{Graph} jako \texttt{pickle\_graph}.
 
 \section{Wyniki}
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
+  
 \end{document}          
