@@ -270,6 +270,14 @@ Po zredukowaniu grafu przechwytywanie listy krawędzi z rzeczywistych wierzchoł
 
 Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę identyfikatorów wierzchołków oraz macierz odległości między nimi. Procedura generowania tych plików (rekurencyjna) jest zrealizowana w obiekcie \texttt{Graph} jako \texttt{pickle\_graph}.
 
+\subsection{System rekomendujący}
+System rekomendujący realizowany jest przez klasę \texttt{Recommender}. Korzysta ona z wcześniej wyliczonych grafów leniwie odczytując je z dysku.
+Do samej rekomendacji służy metoda \texttt{recommend}.
+Przyjmuje ona listę utworów polubionych przez użytkownika i liczbę piosenek, którą system powinien dostarczyć.
+Dla każdego polubionego utworu (i grafów leżących wyżej w hierarchii, które go zawierają) wyznaczamy listę kandydatów do rekomendacji i ich wagi.
+Następnie losujemy bez zwracania potrzebną liczbę elementów.
+
+
 \section{Wyniki}
 
 Przedstawione tutaj wyniki są wytworzone poprzez analizę mniejszego zbioru danych (\textit{subset}) zawierającego około 9500 utworów muzycznych.
