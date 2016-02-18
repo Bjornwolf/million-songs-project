@@ -9,8 +9,6 @@ def prettyprint_song(config_dict, fname):
     json_loc = config_dict['data_path'] + json_loc
     json_dict = json.load(open(json_loc))
     print json_dict['artist'], ' -- ', json_dict['title']
-    print json_dict['tags']
-
 
 def aggregate_tags(config_dict, names):
     all_tags = {}
@@ -31,11 +29,18 @@ def aggregate_tags(config_dict, names):
     return all_tags
 
 
-def compare_aggregators(agg1, agg2):
+def compare_aggregators(agg1, agg2, threshold = 5.0):
+    interesting_tags = []
     for key in agg1:
         if key in agg2:
-            print key, agg1[key], agg2[key]
+            if agg1[key] < threshold or agg2[key] < threshold:
+                interesting_tags.append((key, (agg1[key] + agg2[key]) / 2)) 
 
+    avgsum = sum(map(lambda x: x[1], interesting_tags))
+    ppbs = map(lambda x: (x[0], x[1] / avgsum), interesting_tags)
+    gini_imp = reduce(lambda m, (t, p): m + (p * (1 - p)), ppbs, 0.0)
+
+    print gini_imp
 
 def run():
     config_dict = yaml.load(open(sys.argv[1], 'r'))
