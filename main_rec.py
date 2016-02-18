@@ -31,15 +31,28 @@ def aggregate_tags(config_dict, names):
 
 
 def compare_aggregators(agg1, agg2, threshold=5.0):
-    ppbs = []
+    mse_err = 0.0
+    mde_err = 0.0
+    counted_tags = 0
     for key in agg1:
-        if key in agg2:  # and agg1[key] > threshold and agg2[key] > threshold:
-            ppbs.append(agg1[key] / (agg1[key] + agg2[key]))
+        if key in agg2:
+            mse_err += (agg1[key] - agg2[key]) ** 2
+            mde_err += math.fabs(agg1[key] - agg2[key])
+        else:
+            mse_err += agg1[key] ** 2
+            mde_err += agg1[key]
+        counted_tags += 1
 
-    gini_imp = reduce(lambda m, p: m + (p * (1 - p)), ppbs, 0.0)
+    for key in agg2:
+        if key not in agg1:
+            mse_err += agg2[key] ** 2
+            mde_err += agg2[key]
+            counted_tags += 1
 
-    print gini_imp / len(ppbs)
+    print "MSE: ", mse_err / counted_tags
+    print "MDE: ", mde_err / counted_tags
 
+    return mse_err, mde_err 
 
 def run():
     config_dict = yaml.load(open(sys.argv[1], 'r'))
