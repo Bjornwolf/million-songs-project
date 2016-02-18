@@ -15,12 +15,12 @@ def run():
     data_location = config_dict['data_location']
     uniq_map_file = config_dict['uniq_map_file']
     runiq_map_file = config_dict['runiq_map_file']
-    vertices_map = load_data(data_location, uniq_map_file, runiq_map_file)
+    vertices_map, runiq_map = load_data(data_location)
     broken, unequal = fix_similarity_symmetry(vertices_map)
     print "* Fixed similarity relation symmetry (%d unidirected, %d unequal)" % (broken, unequal)
 
     print "* Vertices map generated"
-    _, deleted = purge_invalid_vertices(vertices_map)
+    _, deleted = purge_invalid_vertices(vertices_map, runiq_map, uniq_map_file, runiq_map_file)
     print "* Cleaned up vertices map (deleted %d isolated vertices)" % (deleted)
  
     if 'min_elems' in config_dict:

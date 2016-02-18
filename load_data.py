@@ -4,7 +4,7 @@ import math
 import gc
 import pickle
 
-def load_data(data_set_glob, uniq_map_file, runiq_map_file):
+def load_data(data_set_glob):
     train_files = glob.glob(data_set_glob)
     uniq_number = 0
     uniq_map = {}
@@ -42,13 +42,7 @@ def load_data(data_set_glob, uniq_map_file, runiq_map_file):
         vertices_map[new_track['track_id']] = new_track
         handler.close() 
 
-    with open(uniq_map_file, "wb") as f:
-        pickle.dump(uniq_map, f)
-
-    with open(runiq_map_file, "wb") as f:
-        pickle.dump({ v: k for k, v in uniq_map.items() }, f)
-
-    return vertices_map
+    return vertices_map, { v: k for k, v in uniq_map.items() }
 
 def fix_similarity_symmetry(vertices_map):
     one_direction_edges = 0
@@ -70,7 +64,7 @@ def fix_similarity_symmetry(vertices_map):
     return one_direction_edges, nonsymmetrical_edges
 
 
-def purge_invalid_vertices(vertices_map):
+def purge_invalid_vertices(vertices_map, runiq_map, uniq_map_file, runiq_map_file):
     deleted = 0
     for key in vertices_map.keys():
         vs = vertices_map[key]['similars'].keys()
@@ -80,5 +74,12 @@ def purge_invalid_vertices(vertices_map):
         if len(vertices_map[key]['similars']) == 0:
             deleted += 1
             del(vertices_map[key])
+            del(runiq_map[key])
+
+    with open(runiq_map_file, "wb") as f:
+        pickle.dump(runiq_map, f)
+
+    with open(uniq_map_file, "wb") as f:
+        pickle.dump({ v: k for k, v in runiq_map.items() }, f)
 
     return vertices_map, deleted
