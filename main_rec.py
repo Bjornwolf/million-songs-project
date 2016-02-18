@@ -31,6 +31,12 @@ def aggregate_tags(config_dict, names):
     return all_tags
 
 
+def compare_aggregators(agg1, agg2):
+    for key in agg1:
+        if key in agg2:
+            print key, agg1[key], agg2[key]
+
+
 def run():
     config_dict = yaml.load(open(sys.argv[1], 'r'))
     uniq = config_dict['uniq_map_file']
@@ -46,6 +52,7 @@ def run():
     print '-->'
     for fname in ch:
         prettyprint_song(config_dict, fname)
-    print aggregate_tags(config_dict, user)
-    print aggregate_tags(config_dict, ch)
+    agg1 = aggregate_tags(config_dict, user)
+    agg2 = aggregate_tags(config_dict, ch)
+    compare_aggregators(agg1, agg2)
 run()
