@@ -35,6 +35,9 @@ def compare_aggregators(agg1, agg2, threshold=5.0):
     mde_err = 0.0
     counted_tags = 0
     for key in agg1:
+        if agg1[key] < threshold:
+            continue
+
         if key in agg2:
             mse_err += (agg1[key] - agg2[key]) ** 2
             mde_err += math.fabs(agg1[key] - agg2[key])
@@ -44,6 +47,9 @@ def compare_aggregators(agg1, agg2, threshold=5.0):
         counted_tags += 1
 
     for key in agg2:
+        if agg2[key] < threshold:
+            continue
+
         if key not in agg1:
             mse_err += agg2[key] ** 2
             mde_err += agg2[key]
