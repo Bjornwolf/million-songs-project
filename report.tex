@@ -71,7 +71,11 @@ Oczywiście każda krawędź w grafie jednoznacznie wyznacza odpowiadającego je
 Każdemu grafowi przypisujemy koszt według pewnej funkcji błędu $F$.
 W każdej iteracji wybieramy pewnego potomka $G_2$ grafu $G_1$ pod warunkiem, że $F(G_2) < F(G_1)$.
 Ponieważ wyznaczanie wartości funkcji $F$ dla każdego potomka grafu $G_1$ byłoby kosztowne obliczeniowo, zastosowaliśmy wybór heurystyczny.
-Wybieramy najkrótszą taką krawędź $e(v_i, v_j)$, że graf $G_{ij}$ powstały przez scalenie $v_i$ i $v_j$ ma niższą funkcję błędu niż jego przodek.
+
+Wybieramy wierzchołek grafu o najmniejszym $inner\_vertices$.
+Spośród krawędzi incydentnych do tego wierzchołka wybieramy najkrótszą taką krawędź $e(v_i, v_j)$, 
+że graf $G_{ij}$ powstały przez scalenie $v_i$ i $v_j$ ma niższą funkcję błędu niż jego przodek.
+Jeśli żadna z krawędzi incydentnych do wierzchołka nie zmniejsza funkcji kosztu, wybieramy kolejny wierzchołek według liczności $inner\_vertices$.
 
 Wybór kończymy, jeśli każdy potomek grafu ma nie mniejszy koszt niż jego przodek lub przekroczymy minimalną wielkość grafu (parametr algorytmu).
 
@@ -89,7 +93,11 @@ SVP (penalizacja superwierzchołków jednoelementowych), BCD (odległości międ
  BCD(G) = \sum_{c_1 \in C} \sum_{c_2 \in C} |e(c_1, c_2)|
 \end{equation}
 
-Sama funkcja kosztu jest iloczynem tych trzech czynników: $F(G) = WCD(G) \times SVP(G) \times BCD(G)$.
+Sama funkcja kosztu jest iloczynem tych trzech czynników: 
+\begin{equation}
+F(G) = (WCD(G) + SVP(G)) \times BCD(G)
+\end{equation}.
+
 
 Obliczanie takiej funkcji jest kosztowne, jednak jeśli znamy wartości wszystkich czynników składających się na funkcję kosztu przodka, 
 możemy na ich podstawie efektywnie wyznaczyć czynniki dla potomka.
@@ -119,6 +127,24 @@ Niech $G_2$ będzie potomkiem $G_1$ łączącym $c_i, c_j \in G_1$ w $c_k \in G_
 \end{equation}
 
 Dzięki temu obliczanie funkcji kosztu dla kolejnych potomków grafu jest znacznie szybsze.
+
+\subsection{Ogląd globalny}
+Początkowy graf dzielimy na spójne składowe algorytmem BFS. W każdej spójnej składowej wywołujemy opisany powyżej algorytm hierarchiczny.
+Grafy na różnych poziomach hierarchii są na tyle małe, żeby dopełnić je do kliki za pomocą algorytmu Floyda-Warshalla.
+Na tak dopełnionych grafach uruchomiony zostanie system rekomendujący.
+
+\subsection{System rekomendujący}
+System rekomendujący jako argument przyjmie piosenki \textbf{polubione} przez użytkownika.
+System odnajduje zadane piosenki w grafie i zapisuje sobie ich sąsiadów. 
+Jeśli sąsiadem jest superwierzchołek, do listy sąsiedztwa zostaje dodana cała jego zawartość (z odległością równą odległości między superwierzchołkami).
+Mamy więc listę par piosenka-odległość (piosenka może na liście występować wielokrotnie, o tym za chwilę).
+Na podstawie takiej listy zbudujemy dla każdej piosenki występującej na liście wartość liczbową mówiącą, jak dobrze nadaje się ona do rekomendacji.
+Niech $distances_{s}$ oznacza [multi]zbiór odległości dla piosenki $s$.
+\begin{equation}
+ weight(s) = \sum_{d in distances(s)} d^{-1}
+\end{equation}
+W ten sposób dla każdej piosenki wyznaczamy odpowiadającą jej wartość liczbową. 
+Rekomendacji dokonujemy losując bez zwracania odpowiednio wiele piosenek z zadanego przez $weight$ rozkładu dyskretnego z wagami.
 
 \section{Implementacja}
 
