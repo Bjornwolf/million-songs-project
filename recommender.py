@@ -15,18 +15,14 @@ class Recommender(object):
             self.runiq = pickle.load(f)
 
     def generate_user(self, n=100):
-        print 'generating user'
         songs = [self.generate_song()]
-        print 'found init song'
         while len(songs) < n:
-            print len(songs)
             recommended = self.recommend(songs, n=5)
             if len(recommended) == 0:
                 song = self.generate_song()
                 if song not in recommended:
                     recommended += [song]
             songs += recommended
-        print 'user generated'
         return songs
 
     def generate_song(self):
