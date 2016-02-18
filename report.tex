@@ -272,5 +272,16 @@ Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę 
 
 \section{Wyniki}
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
-  
+
+Pomimo posiadania wiedzy na temat lokalnego podobieństwa utworów muzycznych, utworzenie miar przechodniego (tudzież "globalnego") podobieństwa pewnych utworów muzycznych okazało się wyzwaniem. System rekomendujący przedstawiony w tym projekcie jest przykładem systemu opartego na idei \textit{content-based-filtering}. Wiedza, którą generuje z informacji zadanych w zbiorze danych jest wiedzą wynikającą wyłącznie z własności przedmiotów rekomendowanych (w tym wypadku - utworów muzycznych). Z racji operowania pojęciem macierzy podobieństwa (która jest obiektem pamięciowo rozległym) wymagane były skomplikowane operacje grupowania danych.
+
+Wielkość opracowywanego zbioru danych sugerowałaby użycie podejść typu \textit{collaborative filtering}. Niestety nie posiadaliśmy danych o użytkownikach i ich ocenach/preferencjach dotyczących utworów - stąd też rowiązanie jest oparte na potencjalnie "gorszej" idei. Niemniej jednak systemy tego typu sprawdzają się lepiej w przypadku, gdy zgromadzonych danych jest niewiele - nie zależą też od ocen użytkowników.
+
+Perspektywy rozwoju tego systemu leżą w ulepszeniu istniejącej implementacji (usprawnienie obliczeń, zmniejszenie zużycia pamięci) oraz implementacji nowych elementów mających wpływ na wyniki rekomendacji:
+
+\begin{itemize}
+  \item możliwe jest wprowadzenie wyborów użytkownika - mógłby on oznaczać pewne utwory jako nielubiane. System rekomendacyjny karałby wtedy utwory znajdujące się w bezpośrednim otoczeniu (odległości) od takich utworów.
+  \item możliwa jest także dalsza regularyzacja funkcji błędu. Rozważanym przez nas pomysłem było m.in. wprowadzenie czynnika \textit{maksymalnej liczności wierzchołków grafu}. System rekomendacyjny karałby wtedy za podgrafy zawierające zbyt wiele elementów.
+\end{itemize}
+
 \end{document}          
