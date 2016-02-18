@@ -321,14 +321,14 @@ class NewGraph(object):
                 if key2 in self.edges[key]:
                     dist_mat[index, index2] = self.edges[key][key2]
 
-        for index, v1 in enumerate(subgraphs_keys):
-            for index2, v2 in enumerate(subgraphs_keys):
-                for index3, w in enumerate(subgraphs_keys):
+        for index_w, w in enumerate(subgraphs_keys):
+            for index_v1, v1 in enumerate(subgraphs_keys):
+                for index_v2, v2 in enumerate(subgraphs_keys):
                     if v1 == v2 or v1 == w or v2 == w:
                         continue
-                    v1w = dist_mat[index, index3]
-                    wv2 = dist_mat[index3, index2]
-                    dist_mat[index, index2] = min(dist_mat[index, index2], v1w + wv2)
+                    v1w = dist_mat[index_v1, index_w]
+                    wv2 = dist_mat[index_w, index_v2]
+                    dist_mat[index_v1, index_v2] = min(dist_mat[index_v1, index_v2], v1w + wv2)
 
         self.edges = {}
         self.distance_matrix = dist_mat

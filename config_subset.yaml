@@ -1,4 +1,5 @@
 data_location: /pio/lscratch/1/i247948/lastfm_subset/**/**/**/*.json
+data_path: /pio/lscratch/1/i247948/lastfm_subset/
 uniq_map_file: /pio/lscratch/1/i247948/pickle_subset/uniq_subset.p
 runiq_map_file: /pio/lscratch/1/i247948/pickle_subset/runiq_subset.p
 pickle_dir: /pio/lscratch/1/i247948/pickle_subset/
