@@ -149,30 +149,37 @@ Rekomendacji dokonujemy losując bez zwracania odpowiednio wiele piosenek z zada
 \section{Implementacja}
 
 Implementacja została podzielona na dwie części:
+\begin{itemize}
+ \item część przygotowania danych -- na tym etapie następuje normalizacja danych, 
+	utworzenie lasu z podanych wierzchołków, zastosowanie algorytmu hierarchicznego oraz eksport powstałego wyniku do plików;
+ \item część rekomendacji -- na tym etapie korzystamy z danych powstałych podczas poprzedniej fazy, 
+	aby dla zadanego przez użytkownika zbioru utworów otrzymanym wynikiem były utwory zarekomendowane przez system.
+\end{itemize}
 
-* Część przygotowania danych - na tym etapie następuje normalizacja danych, utworzenie lasu z podanych wierzchołków, zastosowanie algorytmu hierarchicznego oraz eksport powstałego wyniku do plików.
-* Część rekomendacji - na tym etapie korzystamy z danych powstałych podczas poprzedniej fazy, aby dla zadanego przez użytkownika zbioru utworów otrzymanym wynikiem były utwory zarekomendowane przez system.
-
-Wyzwaniem okazała się złożoność pamięciowa. Istotnie trudnym problemem implementacyjnym okazało się opracowanie efektywnej procedury łączenia dwóch podgrafów w jeden - jest to istotą naszego algorytmu hierarchicznego.
+Wyzwaniem okazała się złożoność pamięciowa. 
+Istotnie trudnym problemem implementacyjnym okazało się opracowanie efektywnej procedury łączenia dwóch podgrafów w jeden -- 
+jest to istotą naszego algorytmu hierarchicznego.
 
 \subsection{Założenia na temat danych}
 
 Przy analizie danych niezbędne okazały się następujące założenia na ich temat:
-
-* Relacja podobieństwa danych powinna być symetryczna. Dane zostały odpowiednio zmodyfikowane, aby założenie to spełnić.
-* Jeżeli podobieństwo utworu $A$ z $B$ wynosi $x$, podobieństwo utworu $B$ z $A$ również powinno wynosić $x$.
-* Grafy należące do lasu będące izolowanym wierzchołkiem nie niosą istotnej informacji dla systemu rekomendacyjnego. Zostały one odrzucone.
-* Jeżeli w grafie istnieje krawędź $\left(v, w\right)$ to $v$ oraz $w$ istnieje w zbiorze danych.
+\begin{itemize}
+ \item relacja podobieństwa danych powinna być symetryczna, więc dane zostały odpowiednio zmodyfikowane, aby założenie to spełnić,
+ \item jeżeli podobieństwo utworu $A$ z $B$ wynosi $x$, podobieństwo utworu $B$ z $A$ również powinno wynosić $x$,
+ \item grafy należące do lasu będące izolowanym wierzchołkiem nie niosą istotnej informacji dla systemu rekomendacyjnego -- zostały one odrzucone,
+ \item jeżeli w grafie istnieje krawędź $\left(v, w\right)$ to $v$ oraz $w$ istnieje w zbiorze danych.
+\end{itemize}
 
 Aby spełnić te założenia w implementacji uwzględniono odpowiednie procedury modyfikujące wejściowy zbiór danych.
 
 \subsection{Poprawa symetryczności miary podobieństwa w zbiorze danych}
 
 W celu poprawienia krawędzi zastosowano procedurę działającą w następujący sposób:
-
-* Dla każdego wierzchołka $v$ występującego w grafie znajdujemy wszystkie krawędzie $\left(v, w\right)$.
-* Dla każdej krawędzi $\left(v, w\right)$ sprawdzamy jej miarę podobieństwa $p_{vw}$. Jeżeli nie istnieje w grafie krawędź $\left(w, v\right)$, tworzymy ją nadając jej miarę podobieństwa $p_{vw}$.
-* Jeżeli krawędź $\left(w, v\right)$ istnieje, sprawdzamy jej miarę podobieństwa $p_{wv}$. Ustalamy miarę podobieństwa obu krawędzi $\left(v, w\right)$ oraz $\left(w, v\right)$ na $p_{m}$, gdzie $p_{m}$ jest zdefiniowane jako $\max\{p_{vw}, p_{wv}\}$.
+\begin{itemize}
+ \item dla każdego wierzchołka $v$ występującego w grafie znajdujemy wszystkie krawędzie $\left(v, w\right)$,
+ \item dla każdej krawędzi $\left(v, w\right)$ sprawdzamy jej miarę podobieństwa $p_{vw}$; jeżeli nie istnieje w grafie krawędź $\left(w, v\right)$, tworzymy ją nadając jej miarę podobieństwa $p_{vw}$,
+ \item jeżeli krawędź $\left(w, v\right)$ istnieje, sprawdzamy jej miarę podobieństwa $p_{wv}$; ustalamy miarę podobieństwa obu krawędzi $\left(v, w\right)$ oraz $\left(w, v\right)$ na $p_{m}$, gdzie $p_{m}$ jest zdefiniowane jako $\max\{p_{vw}, p_{wv}\}$,
+\end{itemize}
 
 Powyższa procedura jest zaimplementowana jako \texttt{fix\_similarity\_symmetry} w module \texttt{load\_data} implementacji. Jej złożoność obliczeniowa to $\mathcal{O}\left(\left|V\right| + \left|E\right|\right)$. Jej wynikiem jest zbiór danych, który spełnia pierwsze i drugie założenie na temat danych.
 
@@ -182,11 +189,11 @@ Po przeprowadzeniu procedury poprawy symetryczności krawędzi wierzchołki i kr
 
 Sposób działania procedury podobny do działania procedury poprawy symetryczności. Przechodzimy wszystkie wierzchołki $v$ występujące w grafie. Jeżeli liczba krawędzi wychodzących z tego wierzchołka to $0$, usuwamy taki wierzchołek. W przeciwnym wypadku przeglądamy wszystkie krawędzie $\left(v, w\right)$. Jeżeli wierzchołek $w$ nie istnieje w grafie, krawędź ta zostaje usunięta.
 
-Odpowiadanie na pytanie 'zawierania wierzchołka' jest zrealizowane w czasie stałym (struktura słownika). Całkowita złożoność prodedury to $\mathcal{O}\left(\left|V\right| + \left|E\right|\right)$. Wynikiem działania procedury jest zbiór danych spełniający trzecie i czwarte założenie dotyczące danych.
+Odpowiadanie na pytanie "zawierania wierzchołka" jest zrealizowane w czasie stałym (struktura słownika). Całkowita złożoność prodedury to $\mathcal{O}\left(\left|V\right| + \left|E\right|\right)$. Wynikiem działania procedury jest zbiór danych spełniający trzecie i czwarte założenie dotyczące danych.
 
 Procedura jest zaimplementowana jako $\texttt{purge\_invalid\_vertices}$ w module $\texttt{load\_data}$.
 
-\subsection{Poprawa złożoności pamięciowej: Obcięcie danych}
+\subsection{Poprawa złożoności pamięciowej: obcięcie danych}
 
 W celu zaoszczędzenia pamięci wczytany zbiór danych został pozbawiony struktury $\texttt{tags}$ zawierającej tagi utworów. Identyfikatory utworów, będące łańcuchami znaków, zostały odwzorowane na zbiór $\{0, 1, \dots , n\}$. Wygenerowana mapa oraz mapa odwrotna tego odwzorowania jest zapisywana jako plik.
 
@@ -200,55 +207,68 @@ Algorytm ten został zrealizowany jako obiekt $\texttt{Forest}$. Dostarczona zos
 
 \subsection{Reprezentacja grafu}
 
-Reprezentacja grafu musiała spełniać następujące warunki: w sposób efektywny obliczeniowo obsługiwać operacje wymagane przez algorytm redukcji, będąc jednocześnie odpowiednio wydajną pamięciowo. \textbb{Każdy wierzchołek w grafie jest podgrafem.}
+Reprezentacja grafu musiała spełniać następujące warunki: w sposób efektywny obliczeniowo obsługiwać operacje wymagane przez algorytm redukcji, będąc jednocześnie odpowiednio wydajną pamięciowo. \textbf{Każdy wierzchołek w grafie jest podgrafem.}
 
 Ostatecznym rozwiązaniem okazała się następująca implementacja:
-
-* W celu szybkiego dostępu do podgrafów grafu utrzymujemy słownik \texttt{subgraphs} będący odwzorowaniem identyfikatorów grafu (liczby $\{-1, -2, ..., -n\}$) na obiekty podgrafów.
-* W celu szybkiego przeglądania krawędzi w grafie stosujemy strukturę \texttt{edges} będącą dwuwymiarowym słownikiem odwzorowującym parę identyfikatorów grafów $\left(v, w\right)$ na posortowaną rosnąco względem odległości listę krotek w postaci $\left(a, b, p\right)$ gdzie $a$ i $b$ to krawędź pomiędzy rzeczywistymi wierzchołkami, a $p$ to miara odległości (odwrotność miary podobieństwa). Z racji dwuwymiarowości możemy szybko odpowiadać na pytania typu "wszystkie krawędzie incydentne z $v$" kosztem dwukrotnego zwiększenia złożoności pamięciowej dla kluczy.  * W celu wydajnego przeprowadzania redukcji utrzymujemy posortowany zbiór identyfikatorów podgrafów, zrealizowany jako drzewo czerwono-czarne. Kluczem sortowania jest wielkość grafu - preferujemy łączyć mniejsze grafy w większe.
+\begin{itemize}
+ \item w celu szybkiego dostępu do podgrafów grafu utrzymujemy słownik \texttt{subgraphs} będący odwzorowaniem identyfikatorów grafu (liczby $\{-1, -2, ..., -n\}$) na obiekty podgrafów,
+ \item w celu szybkiego przeglądania krawędzi w grafie stosujemy strukturę \texttt{edges} będącą dwuwymiarowym słownikiem odwzorowującym parę identyfikatorów grafów $\left(v, w\right)$ na posortowaną rosnąco względem odległości listę krotek w postaci $\left(a, b, p\right)$ gdzie $a$ i $b$ to krawędź pomiędzy rzeczywistymi wierzchołkami, a $p$ to miara odległości (odwrotność miary podobieństwa). Z racji dwuwymiarowości możemy szybko odpowiadać na pytania typu \textit{wszystkie krawędzie incydentne z $v$} kosztem dwukrotnego zwiększenia złożoności pamięciowej dla kluczy,
+ \item w celu wydajnego przeprowadzania redukcji utrzymujemy posortowany zbiór identyfikatorów podgrafów, zrealizowany jako drzewo czerwono-czarne; kluczem sortowania jest wielkość grafu -- preferujemy łączyć mniejsze grafy w większe.
+\end{itemize}
 
 \subsection{Redukcja grafu}
 
 W celu redukowania grafu implementujemy algorytm opisany w poprzedniej sekcji raportu. Procedury \texttt{loss\_after\_merge} oraz \texttt{loss} są implementacjami odpowiednio: wartości funkcji błędu i wartości funkcji błędu po połączeniu pewnych podgrafów $v$ i $w$.
 
-W procedurze $\texttt{reduce}$ realizujemy następujący algorytm:
+W procedurze $\texttt{reduce}$ realizujemy następujący algorytm.
+\begin{itemize}
+ \item dopóki znajdujemy wierzchołek $v$ mogący poprawić graf i liczba wierzchołków grafu jest większa niż pewna stała $M$:
+  \begin{itemize}
+    \item przeglądamy posortowaną rosnąco względem liczby krawędzi w podgrafie listę wierzchołków $v$:
+    \begin{itemize}
+    \item przeglądamy listę krawędzi $\left(v, w\right)$. Obliczamy funkcję błędu i funkcję błędu po scaleniu wierzchołków $v$ i $w$,
+    \item jeżeli scalenie $\left(v, w\right)$ zmniejsza funkcję błędu, scalamy te wierzchołki w jeden podgraf. Oznaczamy iterację jako "udaną",
+    \item jeżeli nie znajdujemy żadnej pary $\left(v, w\right)$ polepszającej funkcję błędu, przerywamy iterację.
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
 
-* Dopóki znajdujemy wierzchołek $v$ mogący poprawić graf i liczba wierzchołków grafu jest większa niż pewna stała $M$:
-* Przeglądamy posortowaną rosnąco względem liczby krawędzi w podgrafie listę wierzchołków $v$:
-* Przeglądamy listę krawędzi $\left(v, w\right)$. Obliczamy funkcję błędu i funkcję błędu po scaleniu wierzchołków $v$ i $w$.
-* Jeżeli scalenie $\left(v, w\right)$ zmniejsza funkcję błędu, scalamy te wierzchołki w jeden podgraf. Oznaczamy iterację jako "udaną".
-* Jeżeli nie znajdujemy żadnej pary $\left(v, w\right)$ polepszającej funkcję błędu, przerywamy iterację.
+
+
 
 \subsection{Łączenie podgrafów}
 
 Łączenie podgrafów $(v, w)$ polega na stworzeniu nowego wierzchołka $G$ będącego nowym podgrafem aktualnie przetwarzanego grafu. Do tego podgrafu przenoszone są:
-
-* Wszystkie wierzchołki należące do $v$ i $w$.
-* Wszystkie krawędzie od $v$ do $w$ (mamy tu na myśli listę połączeń realnych wierzchołków z wagami).
-* Wszystkie krawędzie wewnętrzne w $v$ i w $w$.
+\begin{itemize}
+ \item wszystkie wierzchołki należące do $v$ i $w$,
+ \item wszystkie krawędzie od $v$ do $w$ (mamy tu na myśli listę połączeń realnych wierzchołków z wagami),
+ \item wszystkie krawędzie wewnętrzne w $v$ i w $w$.
+\end{itemize}
 
 Poza tym należy przeprowadzić następujące kroki na poziomie aktualnie przetwarzanego grafu:
 
-* Usunięcie wierzchołków $v$ i $w$.
-* Usunięcie krawędzi incydentnych z $v$ i $w$ (łączymy je z nowym grafem $G$).
-* Usunięcie krawędzi pomiędzy $v$ i $w$.
-* Przekierowanie wszystkich krawędzi $\left(v, x\right)$ i $\left(w, y\right)$ na krawędzie w postaci $\left(G, x\right)$, $\left(G, y\right)$, uwzględniając krawędzie odwrotne.
+\begin{itemize}
+ \item usunięcie wierzchołków $v$ i $w$,
+ \item usunięcie krawędzi incydentnych z $v$ i $w$ (łączymy je z nowym grafem $G$),
+ \item usunięcie krawędzi pomiędzy $v$ i $w$,
+ \item przekierowanie wszystkich krawędzi $\left(v, x\right)$ i $\left(w, y\right)$ na krawędzie w postaci $\left(G, x\right)$, $\left(G, y\right)$, uwzględniając krawędzie odwrotne.
+\end{itemize}
 
-W celu łączenia dwóch posortowanych list będących wartością dwuwymiarowego słownika \texttt{edges} wprowadzona została metoda \texttt{merge_sorted_lists}. Operację łączenia podgrafów realizuje metoda \texttt{merge_subgraphs} obiektu \texttt{Graph}.
+W celu łączenia dwóch posortowanych list będących wartością dwuwymiarowego słownika \texttt{edges} wprowadzona została metoda \texttt{merge\_sorted\_lists}. Operację łączenia podgrafów realizuje metoda \texttt{merge\_subgraphs} obiektu \texttt{Graph}.
 
 \subsection{Obliczanie macierzy odległości}
 
 Efektem redukcji grafu jest struktura, której liczba wierzchołków na pojedyńczym poziomie jest odpowiednio zredukowana. Dzięki temu możemy policzyć macierz odległości. Macierz odległości liczona jest klasycznym algorytmem Floyda-Warshalla, działającym w czasie sześciennym od liczby wierzchołków w grafie.
 
-Procedura ta jest zaimplementowana w obiekcie \texttt{Graph} jako \texttt{distance_matrix}.
+Procedura ta jest zaimplementowana w obiekcie \texttt{Graph} jako \texttt{distance\_matrix}.
 
 \subsection{Optymalizacja pamięciowa: Usuwanie nadmiarowych krawędzi}
 
-Po zredukowaniu grafu przechywywanie listy krawędzi z rzeczywistych wierzchołków i ich wag przestaje być potrzebne. Procedura \texttt{simplify_edges} redukuje listę do jedynego interesującego nas w przypadku macierzy odległości elementu - krotki z najmniejszą odległością.
+Po zredukowaniu grafu przechywywanie listy krawędzi z rzeczywistych wierzchołków i ich wag przestaje być potrzebne. Procedura \texttt{simplify\_edges} redukuje listę do jedynego interesującego nas w przypadku macierzy odległości elementu - krotki z najmniejszą odległością.
 
 \subsection{Format wyjściowy}
 
-Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę identyfikatorów wierzchołków oraz macierz odległości między nimi. Prodecedura generowania tych plików (rekurencyjny) jest zrealizowany w obiekcie \texttt{Graph} jako \texttt{pickle_graph}.
+Wyjściowym formatem dla grafów jest plik posiadający wewnątrz siebie listę identyfikatorów wierzchołków oraz macierz odległości między nimi. Prodecedura generowania tych plików (rekurencyjny) jest zrealizowany w obiekcie \texttt{Graph} jako \texttt{pickle\_graph}.
 
 \section{Wyniki}
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
