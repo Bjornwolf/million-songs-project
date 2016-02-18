@@ -33,12 +33,12 @@ def aggregate_tags(config_dict, names):
 def compare_aggregators(agg1, agg2, threshold=5.0):
     ppbs = []
     for key in agg1:
-        if key in agg2 and agg1[key] > threshold and agg2[key] > threshold:
+        if key in agg2:  # and agg1[key] > threshold and agg2[key] > threshold:
             ppbs.append(agg1[key] / (agg1[key] + agg2[key]))
 
     gini_imp = reduce(lambda m, p: m + (p * (1 - p)), ppbs, 0.0)
 
-    print gini_imp
+    print gini_imp / len(ppbs)
 
 
 def run():
