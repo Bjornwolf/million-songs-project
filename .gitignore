@@ -2,3 +2,5 @@ lastfm_subset/
 lastfm_train/
 lastfm_test/
 *.pyc
+config_subset.yaml
+config_train.yaml
