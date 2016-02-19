@@ -4,3 +4,5 @@ lastfm_test/
 *.pyc
 config_subset.yaml
 config_train.yaml
+pickle_train/
+pickle_subset/

@@ -1,7 +1,7 @@
-data_location: /pio/lscratch/1/i247948/lastfm_train/**/**/**/*.json
-data_path: /pio/lscratch/1/i247948/lastfm_train/
+data_location: /lastfm_train/**/**/**/*.json
+data_path: /lastfm_train/
 min_elems: 300
-uniq_map_file: /pio/lscratch/1/i247948/pickle_train/uniq.p
-runiq_map_file: /pio/lscratch/1/i247948/pickle_train/runiq.p
-hist_path: /pio/lscratch/1/i247948/mde_mse_hist_train.pdf
-pickle_dir: /pio/lscratch/1/i247948/pickle_train/
+uniq_map_file: uniq.p
+runiq_map_file: runiq.p
+hist_path: mde_mse_hist_train.pdf
+pickle_dir: pickle_train/
