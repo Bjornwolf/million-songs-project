@@ -74,6 +74,8 @@ def run():
     rec = Recommender(path, uniq, runiq)
     for sample in range(samples):
         ch = []
+        tags_in_agg1 = []
+        tags_in_agg2 = []
         user = rec.generate_user()
         ch = rec.recommend(user, n=5)
         for fname in user:
@@ -84,16 +86,20 @@ def run():
             prettyprint_song(config_dict, fname)
         agg1 = aggregate_tags(config_dict, user)
         agg2 = aggregate_tags(config_dict, ch)
+        tags_in_agg1.append(len(agg1))
+        tags_in_agg2.append(len(agg2))
         mde, mse = compare_aggregators(agg1, agg2)
         mde_hist.append(mde)
         mse_hist.append(mse)
         print "***************     SAMPLE %d" % (sample)
 
     _, (mse_plot, mde_plot) = plt.subplots(2)
+    print float(sum(tags_in_agg1)) / len(tags_in_agg1)
+    print float(sum(tags_in_agg2)) / len(tags_in_agg2)
     mse_plot.set_title("Mean Squared Error / Tags Hist")
     mde_plot.set_title("Manhattan Dist Error / Tags Hist")
-    mse_plot.hist(mse_hist)
-    mde_plot.hist(mde_hist)
+    mse_plot.hist(mse_hist, bins=100)
+    mde_plot.hist(mde_hist, bins=100)
     plt.savefig(config_dict['hist_path'])
 
 run()

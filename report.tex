@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{polski}
 \usepackage[polish]{babel}
+\usepackage{graphicx}
 \usepackage{amsmath}
 
 % Title Page
@@ -281,11 +282,11 @@ Następnie losujemy bez zwracania potrzebną liczbę elementów.
 \section{Wyniki}
 
 Przedstawione tutaj wyniki są wytworzone poprzez analizę mniejszego zbioru danych (\textit{subset}) zawierającego około 9500 utworów muzycznych.
-Niestety nie ma matematycznej miary poprawności rekomendacji. Niemniej jednak po ręcznym przeanalizowaniu otrzymanych wyników uznajemy efekty za zadowalające. System rekomenduje inne utwory tego samego artysty oraz artystów tworzących swoje albumy w podobnych czasach i stylach muzycznych.
-
-Prezentujemy kilka przykładów symulowanych przez losowanie danych wejściowych i powiązanych z nimi rekomendacji:
+Niestety nie ma matematycznej miary poprawności rekomendacji. Niemniej jednak po ręcznym przeanalizowaniu otrzymanych wyników uznajemy efekty za zadowalające. System rekomenduje inne utwory tego samego artysty oraz artystów tworzących swoje albumy w podobnych czasach i stylach muzycznych. Nie jest to wystarczające do upewnienia się co do jakości systemu. Stąd też zostało zastosowane inne rozwiązanie.
 
 \subsection{Przykłady}
+Prezentujemy kilka przykładów symulowanych przez losowanie danych wejściowych i powiązanych z nimi rekomendacji:
+
 Zapytany o piosenkę Scott Wesley Brown  --  All Rise system podał:
 \begin{itemize}
  \item Mötley Crüe  --  Merry-Go-Round
@@ -303,6 +304,51 @@ Zapytany o piosenkę Jimmy Page  --  Liquid Mercury system podał:
  \item The Police  --  Voices Inside My Head
  \item Otis Taylor  --  Round and Round
 \end{itemize}
+
+\subsection{Analiza jakości rekomendacji}
+
+Z racji braku danych na temat wkładu użytkowników (odsłuchań i polubień) utworów klasyczne metody sprawdzania systemu rekomendacji nie mogły zostać tutaj użyte. Jedyne dostępne nam dane pozwalające ocenić rozwiązanie to tagi utworów. Przypomnijmy - tagi prezentowane są w postaci listy krotek $\left(n, p\right)$ gdzie $n$ jest etykietą danego tagu, a $p$ - wyrażoną od $1$ do $100$ "pewnością" należenia danego utworu do podanego tagu. Nasze rozwiązanie problemu walidacji rekomendacji oparliśmy na następującym pomyśle:
+
+\begin{itemize}
+ \item wytwarzamy \textit{sztucznego użytkownika} według następującej procedury: losujemy pewien utwór ze zbioru danych, nazwijmy go $T$. W kolejnym kroku algorytmu prosimy o 5 rekomendacji dla utworu $T$, po czym otrzymane rekomendacje dodajemy do zbioru 'wejściowego' dla kolejnych prób rekomendacji. W przypadku, gdy system nie potrafi zarekomendować pięciu utworów dla danego $T$, losujemy kolejny utwór, tworząc zbiór $\{T, T2'}$ i ponawiamy próbę. Proces kończymy, gdy uda nam się zgromadzić 100 utworów.
+ \item dla wytworzonego \textit{sztucznego użytkownika} reprezentowanego przez zbiór utworów $\{ t_{1}, t_{2}, \dots, t_{100} \}$ prosimy o kolejne 5 rekomendowanych utworów.
+ \item Przez $C$ oznaczmy zbiór utworów stanowiący sztucznego użytkownika. Przez $R$ zaś - zbiór utworów zarekomendowanych przez tego użytkownika. Na zbiorach $C$ i $R$ wykonujemy procedurę \textit{gromadzenia tagów}.
+\end{itemize}
+
+\subsection{Gromadzenie tagów}
+
+Dla danego zbioru $X$ utworów muzycznych gromadzenie tagów wytwarza pewien agregat $aggregated\_tags\left(X\right)$ zdefiniowany następująco:
+
+\begin{itemize}
+ \item jeżeli dla każdego $t \in X$ jest oznaczone pewnym tagiem o etykiecie $e$, agregat zawiera tag o tej etykiecie.
+ \item dla każdego tagu o etykiecie $e$ w agregacie, jego "pewność" wyrażona jest jako $\frac{\sum^{n}_{i=1} p_{i}}{N}$ gdzie $n$ to liczba utworów oznaczonych tagiem z etykietą $e$, $N$ - liczba utworów muzycznych o niepustej liście tagów, zaś $p_{i}$ jest "pewnością" tagu o etykiecie $e$ dla $i$-tego utworu oznaczonego tagiem z etykietą $e$.
+\end{itemize}
+
+Tak przygotowany agregat tagów jest wykorzystywany w dalszej analizie poprawności systemu.
+
+\subsection{Funkcja błędu}
+
+Naszym założeniem przy ocenie systemu rekomendującego jest to, że dla dowolnego utworu muzycznego $t$ jego rekomendacja $t\prime$ jest oznaczana przez podobne tagi. Aby "mierzyć" to podobieństwo wykorzystaliśmy dwie funkcje błędu:
+
+\begin{itemize}
+ \item Funkcja błędu oparta o odległość Manhattan - naturalna i prosta do analizy miara błędu.
+ \item Funkcja błędu średniokwadratowego - w celu porównania z poprzednią funkcją błędu. Nie bardzo wiadomo co oznaczają wartości tej funkcji.
+\end{itemize}
+
+W przypadku tych błędów "odległością" mierzoną przez funkcję błędu jest różnica "pewności" dla tagów z agregatu tagów dla \textit{sztucznego użytkownika} i kolejnych pięciu rekomendacji. Przy obliczaniu funkcji błędu nie bierzemy pod uwagę tagów o bardzo małej pewności - zakładamy, że są zaburzeniami i odrzucamy je. W przypadku, gdy agregat $X$ jest oznaczany tagiem o etykiecie $e$, a drugi agregat nie - zakładamy że "pewność" dla drugiego agregatu tagu o etykiecie $e$ wynosi $0$.
+
+\subsection{Wyniki testowania}
+
+W celu przeprowadzenia analizy wylosowaliśmy 100 par sztucznych użytkowników i ich kolejnych pięciu rekomendacji. Dla każdej z tych par wyliczyliśmy funkcję błędu MDE (\textit{Manhattan Distance Error}) oraz MSE (\textit{Mean Squared Error}). Poniżej przedstawiamy histogram wartości obu funkcji błędów, podzielonych przez liczbę tagów w agregatach:
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{mde_mse_hist_subset.pdf}
+\caption{Histogram zastosowanych funkcji błędu}
+\end{figure}
+
+Jak można zauważyć, wartości funkcji MDE wskazują na wysoką skuteczność systemu - wartości oscylują w okolicach wartości $10$. Przy zakresie od zera do stu "pewności" tagów, których może być wiele jest to wartość pożądana - oznacza to, że wśród WSZYSTKICH istotnych tagów łączna różnica ich "pewności" oscyluje w granicach tej wartości. Oczywiście wszystko zależy od liczności agregatów tagów. W przypadku sztucznych użytkowników uśredniona liczność odpowiadającego mu agregatu oscylowała dookoła wartości $2000$. W przypadku agregatu kolejnych rekomendacji było to $160$. Liczby te uwzględniają tagi nieistotne, wycięte podczas liczenia funkcji błędu - niemniej jednak pozwalają mieć ogólny wgląd w to, jak liczne są to zbiory.
+
+Warto wspomnieć o pomysłach, które okazały się nieudane - pierwszym naszym pomysłem na funkcję błędu była f. błędu bazująca na indeksie Giniego. Z racji jej własności (etykiety tagów byłyby nierozróżnialne) i trudności w zdefiniowaniu prawdopodobieństwa należenia do analizowanego przez indeks zbioru odrzuciliśmy ten pomysł jako nietrafiony.
 
 \section{Wnioski końcowe, podsumowanie, perspektywy rozwoju}
 
