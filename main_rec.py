@@ -61,12 +61,12 @@ def compare_aggregators(agg1, agg2, threshold=5.0):
     print "MSE: ", mse_err / counted_tags
     print "MDE: ", mde_err / counted_tags
 
-    return mse_err, mde_err 
+    return mse_err / counted_tags, mde_err / counted_tags
 
 def run():
     mse_hist = []
     mde_hist = []
-    samples = 10
+    samples = 100
     config_dict = yaml.load(open(sys.argv[1], 'r'))
     uniq = config_dict['uniq_map_file']
     runiq = config_dict['runiq_map_file']
