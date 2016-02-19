@@ -89,7 +89,7 @@ def run():
         agg2 = aggregate_tags(config_dict, ch)
         tags_in_agg1.append(len(agg1))
         tags_in_agg2.append(len(agg2))
-        mde, mse = compare_aggregators(agg1, agg2)
+        mse, mde = compare_aggregators(agg1, agg2)
         mde_hist.append(mde)
         mse_hist.append(mse)
         print "***************     SAMPLE %d" % (sample)
